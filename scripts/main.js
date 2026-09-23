@@ -12,6 +12,7 @@ import { keyList } from './keyList.js';
 import { createLogger } from './logger.js';
 import { getFooterContext, getModuleTitle, getModuleVersion, getStudioFooter, isModuleActive, registerFooterHelper } from './moduleInfo.js';
 import { createNotifier } from './notify.js';
+import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, isPeerActive, publishApi } from './peer.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
 const log = createLogger(MODULE_ID);
@@ -67,7 +68,13 @@ const api = Object.freeze({
     openModuleSettings,
     readSetting,
     writeSetting,
-    registerSettings
+    registerSettings,
+    peerActive: isPeerActive,
+    peerApi: getPeerApi,
+    peerMethod: getPeerMethod,
+    callPeer,
+    onPeerReady: bindPeerReady,
+    publishApi
 });
 // Set before init for other modules' init hooks
 globalThis.Grimmtale = api;

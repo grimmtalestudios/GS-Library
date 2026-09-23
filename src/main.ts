@@ -37,6 +37,7 @@ import {
     registerFooterHelper
 } from './moduleInfo.js';
 import { createNotifier } from './notify.js';
+import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, isPeerActive, publishApi } from './peer.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
 
@@ -94,7 +95,13 @@ const api = Object.freeze({
     openModuleSettings,
     readSetting,
     writeSetting,
-    registerSettings
+    registerSettings,
+    peerActive: isPeerActive,
+    peerApi: getPeerApi,
+    peerMethod: getPeerMethod,
+    callPeer,
+    onPeerReady: bindPeerReady,
+    publishApi
 });
 
 declare global {

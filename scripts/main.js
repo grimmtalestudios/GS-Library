@@ -17,6 +17,7 @@ import { getFooterContext, getModuleTitle, getModuleVersion, getStudioFooter, is
 import { createNotifier } from './notify.js';
 import { ACCENTS, groundSet, GROUNDS } from './palette.js';
 import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, isPeerActive, publishApi } from './peer.js';
+import { deletePreset, listPresets, registerPresetSetting, savePreset } from './presets.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { fixSfxTriggers } from './shims.js';
 import { applyAppearance, clearAppearance, refreshAppearance } from './stamp.js';
@@ -74,6 +75,9 @@ const api = Object.freeze({
     setAppearance,
     currentTokens: getCurrentTokens,
     setModuleTheme,
+    listPresets,
+    savePreset,
+    deletePreset,
     GROUNDS,
     ACCENTS,
     groundSet,
@@ -113,6 +117,7 @@ Hooks.once('init', () => {
     bootPhases(log, {
         fonts: () => registerFonts(MODULE_ID),
         appearance: registerAppearanceSettings,
+        presets: registerPresetSetting,
         updates: registerUpdateSettings
     });
     log.info(`v${api.version} ready`);

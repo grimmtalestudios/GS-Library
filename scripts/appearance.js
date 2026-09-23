@@ -24,7 +24,7 @@ function themesOf(value) {
     const stored = value && typeof value === 'object' ? Object.entries(value) : [];
     return Object.fromEntries(stored.filter(([, choice]) => isTheme(choice)));
 }
-function toAppearance(raw) {
+export function toAppearance(raw) {
     const value = (raw && typeof raw === 'object' ? raw : {});
     return {
         ground: groundOf(value.ground),

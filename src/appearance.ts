@@ -46,7 +46,7 @@ function themesOf(value: unknown): Record<string, string> {
     return Object.fromEntries(stored.filter(([, choice]) => isTheme(choice)));
 }
 
-function toAppearance(raw: unknown): ResolvedAppearance {
+export function toAppearance(raw: unknown): ResolvedAppearance {
     const value = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
 
     return {

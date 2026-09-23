@@ -1,7 +1,23 @@
-import { MODULE_ID } from './constants.js';
+import {
+    getDiscord,
+    getWebsite,
+    MODULE_ID,
+    STUDIO,
+    STUDIO_DISCORD,
+    STUDIO_SHORT,
+    STUDIO_WEBSITE
+} from './constants.js';
 import { registerFonts } from './fonts.js';
 import { createLocalizer } from './i18n.js';
 import { createLogger } from './logger.js';
+import {
+    getFooterContext,
+    getModuleTitle,
+    getModuleVersion,
+    getStudioFooter,
+    isModuleActive,
+    registerFooterHelper
+} from './moduleInfo.js';
 import { createNotifier } from './notify.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
 
@@ -9,8 +25,20 @@ const log = createLogger(MODULE_ID);
 
 const api = Object.freeze({
     get version() {
-        return game.modules.get(MODULE_ID)?.version ?? '';
+        return getModuleVersion(MODULE_ID);
     },
+    STUDIO,
+    STUDIO_SHORT,
+    STUDIO_WEBSITE,
+    STUDIO_DISCORD,
+    getWebsite,
+    getDiscord,
+    moduleVersion: getModuleVersion,
+    moduleTitle: getModuleTitle,
+    moduleActive: isModuleActive,
+    studioFooter: getStudioFooter,
+    footerContext: getFooterContext,
+    registerFooterHelper,
     createLogger,
     createLocalizer,
     createNotifier,

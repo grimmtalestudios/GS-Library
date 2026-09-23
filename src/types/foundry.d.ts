@@ -72,3 +72,7 @@ declare const ui: {
         error(message: string): PostedNotification
     };
 };
+
+declare const Handlebars: {
+    registerHelper(name: string, fn: (...args: any[]) => unknown): void;
+};

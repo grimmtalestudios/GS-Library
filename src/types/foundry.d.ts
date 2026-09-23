@@ -3,10 +3,19 @@ declare namespace foundry {
         const instances: Map<string, FoundryApp>;
         namespace api {
             const ApplicationV2: any;
+            const DialogV2: any;
             function HandlebarsApplicationMixin(base: any): any;
+        }
+        namespace apps {
+            const FilePicker: { implementation: any };
         }
         namespace handlebars {
             function loadTemplates(paths: string[]): Promise<unknown>;
+            function renderTemplate(path: string, data: object): Promise<string>;
+        }
+        namespace ux {
+            const FormDataExtended: any;
+            const TextEditor: { implementation: any };
         }
     }
 }
@@ -71,6 +80,7 @@ declare const CONFIG: {
 };
 
 declare const game: {
+    version: string;
     combat: FoundryCombat | null;
     combats: {
         viewed: FoundryCombat | null;

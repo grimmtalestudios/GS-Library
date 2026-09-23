@@ -3,6 +3,17 @@ import { bootPhase, bootPhases, safeHook } from './boot.js';
 import { clamp } from './clamp.js';
 import { bindCombatTurns, getCombatantToken, getViewedCombat } from './combat.js';
 import {
+    confirmDialog,
+    getDialogV2,
+    getDragData,
+    getFilePicker,
+    getFormDataExtended,
+    getGeneration,
+    getTextEditor,
+    isAtLeast,
+    toElement
+} from './compat.js';
+import {
     getDiscord,
     getWebsite,
     MODULE_ID,
@@ -47,6 +58,17 @@ const api = Object.freeze({
     studioFooter: getStudioFooter,
     footerContext: getFooterContext,
     registerFooterHelper,
+    generation: getGeneration,
+    atLeast: isAtLeast,
+    textEditor: getTextEditor,
+    renderTemplate: foundry.applications.handlebars.renderTemplate,
+    loadTemplates: foundry.applications.handlebars.loadTemplates,
+    getDragData,
+    dialogV2: getDialogV2,
+    confirmDialog,
+    filePicker: getFilePicker,
+    formDataExtended: getFormDataExtended,
+    toElement,
     createLogger,
     bootPhase,
     bootPhases,

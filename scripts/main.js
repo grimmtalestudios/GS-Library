@@ -1,4 +1,5 @@
 import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
+import { auditTokens, scoreTokens } from './audit.js';
 import { bootPhase, bootPhases, safeHook } from './boot.js';
 import { clamp } from './clamp.js';
 import { contrast } from './colour.js';
@@ -67,6 +68,8 @@ const api = Object.freeze({
     groundSet,
     contrast,
     buildTokens,
+    auditTokens,
+    scoreTokens,
     findFirst,
     injectOnce,
     quietCloseButton,

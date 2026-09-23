@@ -14,6 +14,7 @@ import { getFooterContext, getModuleTitle, getModuleVersion, getStudioFooter, is
 import { createNotifier } from './notify.js';
 import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, isPeerActive, publishApi } from './peer.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
+import { fixSfxTriggers } from './shims.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
 import { checkForUpdates, collectUpdates, isStudioModule, registerUpdateSettings } from './updates.js';
 const log = createLogger(MODULE_ID);
@@ -96,5 +97,7 @@ Hooks.once('init', () => {
     Hooks.callAll(`${MODULE_ID}.ready`, api);
 });
 Hooks.once('ready', () => {
+    // fixSfxTriggers inspects listeners other modules register during init
+    bootPhase(log, 'shims', fixSfxTriggers);
     void checkForUpdates().catch((err) => log.debug('update check failed', err));
 });

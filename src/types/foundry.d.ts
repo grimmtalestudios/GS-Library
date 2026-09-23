@@ -88,6 +88,10 @@ declare const CONFIG: {
 
 declare const game: {
     version: string;
+    system: {
+        id: string;
+        version: string;
+    };
     combat: FoundryCombat | null;
     combats: {
         viewed: FoundryCombat | null;
@@ -121,6 +125,10 @@ declare const canvas: {
 };
 
 declare const Hooks: {
+    events: Record<string, {
+        id: number;
+        fn: unknown
+    }[] | undefined>;
     once(hook: string, fn: (...args: any[]) => void): number;
     on(hook: string, fn: (...args: any[]) => void): number;
     off(hook: string, id: number): void;

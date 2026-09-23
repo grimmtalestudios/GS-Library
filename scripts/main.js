@@ -1,5 +1,6 @@
 import { getDiscord, getWebsite, MODULE_ID, STUDIO, STUDIO_DISCORD, STUDIO_SHORT, STUDIO_WEBSITE } from './constants.js';
 import { registerFonts } from './fonts.js';
+import { getGMIds, getPrimaryGM, hasActiveGM, isPrimaryGM } from './gm.js';
 import { createLocalizer } from './i18n.js';
 import { createLogger } from './logger.js';
 import { getFooterContext, getModuleTitle, getModuleVersion, getStudioFooter, isModuleActive, registerFooterHelper } from './moduleInfo.js';
@@ -25,6 +26,10 @@ const api = Object.freeze({
     createLogger,
     createLocalizer,
     createNotifier,
+    primaryGM: getPrimaryGM,
+    isPrimaryGM,
+    hasActiveGM,
+    gmIds: getGMIds,
     createTheme
 });
 // Set before init for other modules' init hooks

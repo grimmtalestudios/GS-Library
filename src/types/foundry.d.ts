@@ -18,6 +18,13 @@ interface FoundryModule {
     api?: unknown;
 }
 
+interface FoundryUser {
+    id: string;
+    name: string;
+    isGM: boolean;
+    active: boolean;
+}
+
 interface FontDefinition {
     editor: boolean;
     fonts: {
@@ -48,9 +55,10 @@ declare const game: {
         register(namespace: string, key: string, data: object): void;
         get(namespace: string, key: string): unknown;
     };
-    user: {
-        isGM: boolean;
-        name: string
+    user: FoundryUser;
+    users: {
+        activeGM: FoundryUser | null;
+        filter(predicate: (user: FoundryUser) => boolean): FoundryUser[];
     };
 };
 

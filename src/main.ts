@@ -8,6 +8,7 @@ import {
     STUDIO_WEBSITE
 } from './constants.js';
 import { registerFonts } from './fonts.js';
+import { getGMIds, getPrimaryGM, hasActiveGM, isPrimaryGM } from './gm.js';
 import { createLocalizer } from './i18n.js';
 import { createLogger } from './logger.js';
 import {
@@ -42,6 +43,10 @@ const api = Object.freeze({
     createLogger,
     createLocalizer,
     createNotifier,
+    primaryGM: getPrimaryGM,
+    isPrimaryGM,
+    hasActiveGM,
+    gmIds: getGMIds,
     createTheme
 });
 

@@ -18,6 +18,7 @@ import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, isPeerActive, publi
 import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { fixSfxTriggers } from './shims.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
+import { buildTokens } from './tokens.js';
 import { checkForUpdates, collectUpdates, isStudioModule, registerUpdateSettings } from './updates.js';
 const log = createLogger(MODULE_ID);
 const api = Object.freeze({
@@ -65,6 +66,7 @@ const api = Object.freeze({
     ACCENTS,
     groundSet,
     contrast,
+    buildTokens,
     findFirst,
     injectOnce,
     quietCloseButton,

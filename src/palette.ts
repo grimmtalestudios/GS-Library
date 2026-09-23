@@ -1,4 +1,4 @@
-import { isDarkGround, lightnessOf, parseColour, withLightness } from './colour.js';
+import { isDarkGround, lightnessOf, parseColour, pushToContrast, withLightness } from './colour.js';
 
 interface GroundSet {
     bg: string;
@@ -97,4 +97,20 @@ export function groundSet(hex: unknown): GroundSet {
         bgAlt: designed.bgAlt,
         header: designed.header
     };
+}
+
+const HOVER_LIFT = 0.104;
+
+export function accentPartner(accent: string, bg: string): string {
+    const isDark = isDarkGround(bg);
+    const preset = Object.values(ACCENTS).find((entry) => entry.value === accent.toLowerCase());
+
+    // Preset partners were designed for dark grounds
+    if (preset && isDark) {
+        return preset.strong;
+    }
+
+    const moved = withLightness(accent, lightnessOf(accent) + (isDark ? HOVER_LIFT : -HOVER_LIFT));
+
+    return pushToContrast(moved, bg, 4.5);
 }

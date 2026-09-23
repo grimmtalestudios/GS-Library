@@ -146,3 +146,29 @@ export function isDarkGround(hex: string): boolean {
 
     return rgb ? luminance(rgb) < 0.18 : true;
 }
+
+export function pushToContrast(hex: string, ground: string, target: number): string {
+    if (contrast(hex, ground) >= target) {
+        return hex;
+    }
+
+    let far = isDarkGround(ground) ? 1 : 0;
+
+    if (contrast(withLightness(hex, far), ground) < target) {
+        return withLightness(hex, far);
+    }
+
+    let near = lightnessOf(hex);
+
+    for (let i = 0; i < 12; i++) { // 12 halvings, finer than one 8-bit channel step
+        const mid = (near + far) / 2;
+
+        if (contrast(withLightness(hex, mid), ground) >= target) {
+            far = mid;
+        } else {
+            near = mid;
+        }
+    }
+
+    return withLightness(hex, far);
+}

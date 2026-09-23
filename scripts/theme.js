@@ -1,14 +1,5 @@
-import { resolveTheme, THEMES } from './appearance.js';
 import { MODULE_ID } from './constants.js';
-function stampTheme(element, moduleId) {
-    element.dataset.theme = resolveTheme([THEMES.dark, THEMES.base], moduleId);
-    element.dataset.gsModule = moduleId;
-}
-function restampThemes() {
-    for (const element of document.querySelectorAll('[data-gs-module]')) {
-        stampTheme(element, element.dataset.gsModule ?? '');
-    }
-}
+import { applyAppearance, refreshAppearance } from './stamp.js';
 export function registerAppearanceSettings() {
     for (const [key, scope] of [['appearance', 'world'], ['appearanceOverride', 'client']]) {
         game.settings.register(MODULE_ID, key, {
@@ -16,13 +7,21 @@ export function registerAppearanceSettings() {
             config: false,
             type: Object,
             default: {},
-            onChange: restampThemes
+            onChange: refreshAppearance
         });
     }
 }
 export function createTheme(moduleId) {
     return {
-        apply: (app) => stampTheme(app.element, moduleId),
-        applyTo: (element) => stampTheme(element, moduleId)
+        apply: (app) => applyAppearance(app.element, { moduleId }),
+        applyTo: (element, { overlay = false } = {}) => applyAppearance(element, {
+            moduleId,
+            overlay
+        }),
+        // We skip the backdrop blur over the canvas, where it repaints every frame
+        applyToOverlay: (element) => applyAppearance(element, {
+            moduleId,
+            overlay: true
+        })
     };
 }

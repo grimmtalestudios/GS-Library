@@ -19,6 +19,7 @@ import { ACCENTS, groundSet, GROUNDS } from './palette.js';
 import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, isPeerActive, publishApi } from './peer.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { fixSfxTriggers } from './shims.js';
+import { applyAppearance, clearAppearance, refreshAppearance } from './stamp.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
 import { buildTokens } from './tokens.js';
 import { checkForUpdates, collectUpdates, isStudioModule, registerUpdateSettings } from './updates.js';
@@ -67,6 +68,9 @@ const api = Object.freeze({
     createTheme,
     resolveAppearance,
     resolveTheme,
+    applyAppearance,
+    clearAppearance,
+    refreshAppearance,
     setAppearance,
     currentTokens: getCurrentTokens,
     setModuleTheme,

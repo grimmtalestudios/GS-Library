@@ -1,20 +1,10 @@
-import { resolveTheme, THEMES } from './appearance.js';
 import { MODULE_ID } from './constants.js';
+import { applyAppearance, refreshAppearance } from './stamp.js';
 
 interface ThemeController {
-    apply(app: { element: HTMLElement }): void;
-    applyTo(element: HTMLElement): void;
-}
-
-function stampTheme(element: HTMLElement, moduleId: string): void {
-    element.dataset.theme = resolveTheme([THEMES.dark, THEMES.base], moduleId);
-    element.dataset.gsModule = moduleId;
-}
-
-function restampThemes(): void {
-    for (const element of document.querySelectorAll<HTMLElement>('[data-gs-module]')) {
-        stampTheme(element, element.dataset.gsModule ?? '');
-    }
+    apply(app: { element: HTMLElement }): string;
+    applyTo(element: HTMLElement, options?: { overlay?: boolean }): string;
+    applyToOverlay(element: HTMLElement): string;
 }
 
 export function registerAppearanceSettings(): void {
@@ -24,14 +14,23 @@ export function registerAppearanceSettings(): void {
             config: false,
             type: Object,
             default: {},
-            onChange: restampThemes
+            onChange: refreshAppearance
         });
     }
 }
 
 export function createTheme(moduleId: string): ThemeController {
     return {
-        apply: (app) => stampTheme(app.element, moduleId),
-        applyTo: (element) => stampTheme(element, moduleId)
+        apply: (app) => applyAppearance(app.element, { moduleId }),
+        applyTo: (element, { overlay = false } = {}) => applyAppearance(element, {
+            moduleId,
+            overlay
+        }),
+
+        // We skip the backdrop blur over the canvas, where it repaints every frame
+        applyToOverlay: (element) => applyAppearance(element, {
+            moduleId,
+            overlay: true
+        })
     };
 }

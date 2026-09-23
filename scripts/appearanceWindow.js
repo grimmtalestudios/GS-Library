@@ -1,0 +1,248 @@
+import { hasUserOverride, resolveAppearance, setAppearance, toAppearance } from './appearance.js';
+import { isDarkGround } from './colour.js';
+import { MODULE_ID } from './constants.js';
+import { quietCloseButton } from './dom.js';
+import { finishesFor } from './finishes.js';
+import { createLocalizer } from './i18n.js';
+import { trackInputMode } from './inputMode.js';
+import { createLogger } from './logger.js';
+import { getFooterContext } from './moduleInfo.js';
+import { ACCENTS, GROUNDS } from './palette.js';
+import { buildSurface, toTranslucent } from './surface.js';
+import { createTheme } from './theme.js';
+import { buildTokens } from './tokens.js';
+const WINDOW_ID = `${MODULE_ID}-appearance`;
+const ICON = 'fa-solid fa-palette';
+const TEMPLATE = `modules/${MODULE_ID}/templates/appearance.hbs`;
+const GROUND_SWATCHES = Object.values(GROUNDS).map(({ label, bg }) => ({
+    label,
+    colour: bg
+}));
+const ACCENT_SWATCHES = Object.values(ACCENTS).map(({ label, value }) => ({
+    label,
+    colour: value
+}));
+const loc = createLocalizer('GRIMMTALE.settings');
+const log = createLogger(MODULE_ID);
+const theme = createTheme(MODULE_ID);
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+function toLook({ modules: _modules, ...look }) {
+    return look;
+}
+function getInitialScope() {
+    if (hasUserOverride()) {
+        return 'user';
+    }
+    return game.user.isGM ? 'world' : 'follow';
+}
+function getInitialDraft() {
+    return {
+        ...toLook(resolveAppearance()),
+        scope: getInitialScope()
+    };
+}
+function swatchGroup(picks, swatches, current) {
+    return {
+        picks,
+        legend: loc(`${picks}.legend`),
+        custom: loc(`${picks}.custom`),
+        value: current,
+        swatches: swatches.map((swatch) => ({
+            ...swatch,
+            active: swatch.colour === current
+        }))
+    };
+}
+function finishChoices(draft) {
+    return Object.entries(finishesFor(isDarkGround(draft.ground))).map(([key, finish]) => ({
+        key,
+        label: finish.label,
+        active: key === draft.finish
+    }));
+}
+function scopeChoices(scope) {
+    const offered = game.user.isGM ? ['world', 'user'] : ['follow', 'user'];
+    return offered.map((value) => ({
+        value,
+        label: loc(`scope.${value}`),
+        active: value === scope
+    }));
+}
+function setStyles(element, styles) {
+    for (const [name, value] of Object.entries(styles)) {
+        element?.style.setProperty(name, value);
+    }
+}
+function paintPreview(root, draft) {
+    const tokens = buildTokens(draft);
+    const surface = buildSurface(draft, true);
+    setStyles(root.querySelector('[data-preview]'), tokens);
+    setStyles(root.querySelector('[data-preview-body]'), surface.content);
+    setStyles(root.querySelector('[data-preview-header]'), {
+        'background-color': surface.header,
+        '--gs-ink': tokens['--gs-title']
+    });
+}
+function paintFinishSamples(root, draft) {
+    const finishes = finishesFor(isDarkGround(draft.ground));
+    for (const sample of root.querySelectorAll('[data-finish-sample]')) {
+        const finish = finishes[sample.dataset.finishSample ?? ''];
+        setStyles(sample, {
+            'background-color': toTranslucent(draft.ground, finish.alpha),
+            'background-image': finish.image
+        });
+    }
+}
+function markSwatches(root, picks, current) {
+    for (const swatch of root.querySelectorAll(`[data-action="pickColour"][data-picks="${picks}"]`)) {
+        swatch.ariaPressed = String(swatch.dataset.colour === current);
+    }
+}
+function markSaving(form) {
+    const button = form.querySelector('button[type="submit"]');
+    button?.toggleAttribute('disabled', true);
+    button?.setAttribute('aria-busy', 'true');
+    button?.querySelector('i')?.setAttribute('class', 'fa-solid fa-spinner gs-spin');
+}
+async function saveDraft({ scope, ...look }) {
+    if (scope === 'world') {
+        await setAppearance(look, { scope: 'world' });
+        // Turn the GM's override off so the new world appearance shows
+        await setAppearance({ enabled: false });
+        return;
+    }
+    await setAppearance(scope === 'user' ? {
+        ...look,
+        enabled: true
+    } : { enabled: false });
+}
+export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
+    static DEFAULT_OPTIONS = {
+        id: WINDOW_ID,
+        tag: 'form',
+        classes: ['gs-shared-base', 'gs-library-appearance-window'],
+        window: {
+            title: 'GRIMMTALE.settings.title',
+            icon: ICON,
+            resizable: false
+        },
+        position: {
+            width: 660, // room for six accent swatches beside the preview
+            height: 'auto'
+        },
+        form: {
+            handler: AppearanceWindow.onSubmit,
+            submitOnChange: false,
+            closeOnSubmit: true
+        },
+        actions: {
+            pickColour: AppearanceWindow.onPickColour,
+            pickFinish: AppearanceWindow.onPickFinish,
+            pickScope: AppearanceWindow.onPickScope,
+            reset: AppearanceWindow.onReset,
+            cancel: AppearanceWindow.onCancel
+        }
+    };
+    static PARTS = {
+        body: { template: TEMPLATE }
+    };
+    draft = getInitialDraft();
+    async _prepareContext(options) {
+        const context = await super._prepareContext(options);
+        return {
+            ...context,
+            ...getFooterContext(MODULE_ID),
+            swatchGroups: [
+                swatchGroup('ground', GROUND_SWATCHES, this.draft.ground),
+                swatchGroup('accent', ACCENT_SWATCHES, this.draft.accent)
+            ],
+            finishes: finishChoices(this.draft),
+            scopes: scopeChoices(this.draft.scope)
+        };
+    }
+    _onFirstRender(context, options) {
+        super._onFirstRender(context, options);
+        theme.apply(this);
+        trackInputMode(this.element);
+        quietCloseButton(this.element);
+    }
+    _onRender(context, options) {
+        super._onRender(context, options);
+        this.paint();
+        for (const well of this.element.querySelectorAll('input[type="color"]')) {
+            well.addEventListener('input', () => this.onWellInput(well));
+        }
+    }
+    paint() {
+        paintPreview(this.element, this.draft);
+        paintFinishSamples(this.element, this.draft);
+    }
+    // Re-rendering mid-drag closes the colour picker
+    onWellInput(well) {
+        const picks = well.dataset.picks;
+        this.draft[picks] = well.value;
+        this.paint();
+        markSwatches(this.element, picks, well.value);
+    }
+    static onPickColour(_event, target) {
+        const { picks, colour } = target.dataset;
+        if (!colour) {
+            return;
+        }
+        this.draft[picks] = colour;
+        void this.render();
+    }
+    static onPickFinish(_event, target) {
+        this.draft.finish = target.dataset.finish ?? this.draft.finish;
+        void this.render();
+    }
+    static onPickScope(_event, target) {
+        this.draft.scope = target.value;
+    }
+    static onReset() {
+        this.draft = {
+            ...toLook(toAppearance({})),
+            scope: this.draft.scope
+        };
+        void this.render();
+    }
+    static onCancel() {
+        void this.close();
+    }
+    static async onSubmit(_event, form) {
+        markSaving(form);
+        try {
+            await saveDraft(this.draft);
+        }
+        catch (err) {
+            log.fail(loc('saveFailed'), err);
+        }
+    }
+}
+// registerMenu creates a new instance per click
+class AppearanceMenu extends ApplicationV2 {
+    render() {
+        openAppearanceWindow();
+        return this;
+    }
+}
+export function registerAppearanceMenu() {
+    game.settings.registerMenu(MODULE_ID, 'librarySettings', {
+        name: 'GRIMMTALE.settings.menuName',
+        label: 'GRIMMTALE.settings.menuLabel',
+        hint: 'GRIMMTALE.settings.menuHint',
+        icon: ICON,
+        type: AppearanceMenu,
+        restricted: false
+    });
+}
+export function openAppearanceWindow() {
+    const open = foundry.applications.instances.get(WINDOW_ID);
+    if (open) {
+        open.bringToFront();
+        return open;
+    }
+    const app = new AppearanceWindow();
+    void app.render(true);
+    return app;
+}

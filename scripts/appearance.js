@@ -47,6 +47,9 @@ function getUserOverride() {
         ...toAppearance(raw)
     };
 }
+export function hasUserOverride() {
+    return getUserOverride().enabled;
+}
 export function resolveAppearance() {
     const { enabled, ...override } = getUserOverride();
     return enabled ? override : getWorldAppearance();

@@ -6,6 +6,7 @@ import {
     setModuleTheme,
     THEMES
 } from './appearance.js';
+import { openAppearanceWindow, registerAppearanceMenu } from './appearanceWindow.js';
 import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
 import { auditTokens, scoreTokens } from './audit.js';
 import { bootPhase, bootPhases, safeHook } from './boot.js';
@@ -112,6 +113,7 @@ const api = Object.freeze({
     listPresets,
     savePreset,
     deletePreset,
+    openLibrarySettings: openAppearanceWindow,
     GROUNDS,
     ACCENTS,
     groundSet,
@@ -159,6 +161,7 @@ Hooks.once('init', () => {
         fonts: () => registerFonts(MODULE_ID),
         appearance: registerAppearanceSettings,
         presets: registerPresetSetting,
+        settingsMenu: registerAppearanceMenu,
         updates: registerUpdateSettings
     });
     log.info(`v${api.version} ready`);

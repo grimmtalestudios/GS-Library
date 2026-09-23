@@ -1,7 +1,7 @@
 import { isDarkGround, parseColour } from './colour.js';
 import { finishFor } from './finishes.js';
 import { groundSet } from './palette.js';
-function toTranslucent(hex, alpha) {
+export function toTranslucent(hex, alpha) {
     const rgb = parseColour(hex);
     return rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})` : hex;
 }

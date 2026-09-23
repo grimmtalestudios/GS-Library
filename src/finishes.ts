@@ -7,7 +7,7 @@ interface Finish {
 
 export const DEFAULT_FINISH = 'flat';
 
-function finishesFor(isDark: boolean): Record<string, Finish> {
+export function finishesFor(isDark: boolean): Record<string, Finish> {
     const sheen = isDark ? '255, 255, 255' : '23, 21, 15';
     const at = (alpha: number): string => `rgba(${sheen}, ${alpha})`;
     const clear = at(0);

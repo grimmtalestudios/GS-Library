@@ -74,6 +74,10 @@ function getUserOverride(): ResolvedAppearance & { enabled: boolean } {
     };
 }
 
+export function hasUserOverride(): boolean {
+    return getUserOverride().enabled;
+}
+
 export function resolveAppearance(): ResolvedAppearance {
     const { enabled, ...override } = getUserOverride();
 

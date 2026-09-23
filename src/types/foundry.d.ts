@@ -106,6 +106,7 @@ declare const game: {
     };
     settings: {
         register(namespace: string, key: string, data: object): void;
+        registerMenu(namespace: string, key: string, data: object): void;
         get(namespace: string, key: string): unknown;
         set(namespace: string, key: string, value: unknown): Promise<unknown>;
         settings: Map<string, unknown>;

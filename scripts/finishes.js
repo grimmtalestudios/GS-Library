@@ -1,5 +1,5 @@
 export const DEFAULT_FINISH = 'flat';
-function finishesFor(isDark) {
+export function finishesFor(isDark) {
     const sheen = isDark ? '255, 255, 255' : '23, 21, 15';
     const at = (alpha) => `rgba(${sheen}, ${alpha})`;
     const clear = at(0);

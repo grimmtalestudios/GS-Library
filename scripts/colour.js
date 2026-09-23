@@ -1,0 +1,103 @@
+const SHORT_HEX = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i;
+const FULL_HEX = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i;
+export function parseColour(value) {
+    const text = String(value ?? '').trim();
+    const short = SHORT_HEX.exec(text);
+    const channels = short ? short.slice(1).map((digit) => digit + digit) : FULL_HEX.exec(text)?.slice(1);
+    if (!channels) {
+        return null;
+    }
+    const [r, g, b] = channels.map((channel) => parseInt(channel, 16));
+    return {
+        r,
+        g,
+        b
+    };
+}
+function toChannelHex(value) {
+    return Math.round(Math.min(255, Math.max(0, value))).toString(16).padStart(2, '0');
+}
+export function toHex({ r, g, b }) {
+    return `#${toChannelHex(r)}${toChannelHex(g)}${toChannelHex(b)}`;
+}
+function toLinear(channel) {
+    const c = channel / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+}
+export function luminance({ r, g, b }) {
+    return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+}
+export function contrast(a, b) {
+    const first = parseColour(a);
+    const second = parseColour(b);
+    if (!first || !second) {
+        return 1; // lowest possible ratio, so a bad colour fails every target
+    }
+    const [dark, light] = [luminance(first), luminance(second)].sort((x, y) => x - y);
+    return (light + 0.05) / (dark + 0.05);
+}
+function hueOf(red, green, blue) {
+    const max = Math.max(red, green, blue);
+    const d = max - Math.min(red, green, blue);
+    if (max === red) {
+        return ((green - blue) / d + (green < blue ? 6 : 0)) / 6;
+    }
+    return max === green ? ((blue - red) / d + 2) / 6 : ((red - green) / d + 4) / 6;
+}
+function toHsl({ r, g, b }) {
+    const [red, green, blue] = [r / 255, g / 255, b / 255];
+    const max = Math.max(red, green, blue);
+    const min = Math.min(red, green, blue);
+    const l = (max + min) / 2;
+    if (max === min) {
+        return {
+            h: 0,
+            s: 0,
+            l
+        };
+    }
+    const d = max - min;
+    return {
+        h: hueOf(red, green, blue),
+        s: l > 0.5 ? d / (2 - max - min) : d / (max + min),
+        l
+    };
+}
+function hueToChannel(p, q, hue) {
+    const t = hue - Math.floor(hue);
+    if (t < 1 / 6) {
+        return p + (q - p) * 6 * t;
+    }
+    if (t < 1 / 2) {
+        return q;
+    }
+    return t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p;
+}
+function toRgb({ h, s, l }) {
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    return {
+        r: hueToChannel(p, q, h + 1 / 3) * 255,
+        g: hueToChannel(p, q, h) * 255,
+        b: hueToChannel(p, q, h - 1 / 3) * 255
+    };
+}
+// Core's Color truncates channels and shifts colours saved in worlds
+export function withLightness(hex, lightness) {
+    const rgb = parseColour(hex);
+    if (!rgb) {
+        return hex;
+    }
+    return toHex(toRgb({
+        ...toHsl(rgb),
+        l: Math.min(1, Math.max(0, lightness))
+    }));
+}
+export function lightnessOf(hex) {
+    const rgb = parseColour(hex);
+    return rgb ? toHsl(rgb).l : 0;
+}
+export function isDarkGround(hex) {
+    const rgb = parseColour(hex);
+    return rgb ? luminance(rgb) < 0.18 : true;
+}

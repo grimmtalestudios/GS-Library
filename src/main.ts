@@ -1,6 +1,7 @@
 import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
 import { bootPhase, bootPhases, safeHook } from './boot.js';
 import { clamp } from './clamp.js';
+import { contrast } from './colour.js';
 import { bindCombatTurns, getCombatantToken, getViewedCombat } from './combat.js';
 import {
     confirmDialog,
@@ -37,6 +38,7 @@ import {
     registerFooterHelper
 } from './moduleInfo.js';
 import { createNotifier } from './notify.js';
+import { ACCENTS, groundSet, GROUNDS } from './palette.js';
 import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, isPeerActive, publishApi } from './peer.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { fixSfxTriggers } from './shims.js';
@@ -86,6 +88,10 @@ const api = Object.freeze({
     hasActiveGM,
     gmIds: getGMIds,
     createTheme,
+    GROUNDS,
+    ACCENTS,
+    groundSet,
+    contrast,
     findFirst,
     injectOnce,
     quietCloseButton,

@@ -1,0 +1,100 @@
+import { isDarkGround, lightnessOf, parseColour, withLightness } from './colour.js';
+
+interface GroundSet {
+    bg: string;
+    bgAlt: string;
+    header: string;
+}
+
+export const GROUNDS = Object.freeze({
+    warm: {
+        label: 'Warm black',
+        bg: '#17150f',
+        bgAlt: '#1f1c15',
+        header: '#211d15'
+    },
+    deep: {
+        label: 'Deep',
+        bg: '#0f0c08',
+        bgAlt: '#17130c',
+        header: '#1a1610'
+    },
+    neutral: {
+        label: 'Neutral',
+        bg: '#161616',
+        bgAlt: '#1e1e1e',
+        header: '#202020'
+    },
+    cool: {
+        label: 'Cool slate',
+        bg: '#14161c',
+        bgAlt: '#1c1f27',
+        header: '#1e222b'
+    }
+});
+
+export const ACCENTS = Object.freeze({
+    blood: {
+        label: 'Blood',
+        value: '#c9553f',
+        strong: '#e0765d'
+    },
+    ember: {
+        label: 'Ember',
+        value: '#e07a45',
+        strong: '#e89b72'
+    },
+    brass: {
+        label: 'Brass',
+        value: '#c9a24a',
+        strong: '#d5b773'
+    },
+    gold: {
+        label: 'Gold',
+        value: '#c9973f',
+        strong: '#d5ad68'
+    },
+    moss: {
+        label: 'Moss',
+        value: '#7ea36f',
+        strong: '#9bb88f'
+    },
+    sky: {
+        label: 'Sky',
+        value: '#8ab9d0',
+        strong: '#b0d0df'
+    }
+});
+
+function findDesignedGround(hex: string): GroundSet | undefined {
+    const bg = hex.toLowerCase();
+
+    return Object.values(GROUNDS).find((ground) => ground.bg === bg);
+}
+
+function deriveGround(bg: string): GroundSet {
+    const l = lightnessOf(bg);
+    const isDark = isDarkGround(bg);
+
+    // Module stylesheets use pale ink in .window-header
+    return {
+        bg,
+        bgAlt: withLightness(bg, isDark ? l + 0.035 : l - 0.045),
+        header: withLightness(bg, Math.min(0.12, Math.max(0.055, isDark ? l + 0.03 : 0.085)))
+    };
+}
+
+export function groundSet(hex: unknown): GroundSet {
+    const bg = parseColour(hex) ? String(hex).toLowerCase() : GROUNDS.warm.bg;
+    const designed = findDesignedGround(bg);
+
+    if (!designed) {
+        return deriveGround(bg);
+    }
+
+    return {
+        bg: designed.bg,
+        bgAlt: designed.bgAlt,
+        header: designed.header
+    };
+}

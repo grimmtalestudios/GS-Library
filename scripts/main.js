@@ -1,3 +1,4 @@
+import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
 import { clamp } from './clamp.js';
 import { getDiscord, getWebsite, MODULE_ID, STUDIO, STUDIO_DISCORD, STUDIO_SHORT, STUDIO_WEBSITE } from './constants.js';
 import { findFirst, injectOnce, quietCloseButton } from './dom.js';
@@ -8,6 +9,7 @@ import { keyList } from './keyList.js';
 import { createLogger } from './logger.js';
 import { getFooterContext, getModuleTitle, getModuleVersion, getStudioFooter, isModuleActive, registerFooterHelper } from './moduleInfo.js';
 import { createNotifier } from './notify.js';
+import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
 const log = createLogger(MODULE_ID);
 const api = Object.freeze({
@@ -38,7 +40,14 @@ const api = Object.freeze({
     injectOnce,
     quietCloseButton,
     clamp,
-    keyList
+    keyList,
+    openApps: getOpenApps,
+    openAppsOf: getOpenAppsOf,
+    refreshApps,
+    openModuleSettings,
+    readSetting,
+    writeSetting,
+    registerSettings
 });
 // Set before init for other modules' init hooks
 globalThis.Grimmtale = api;

@@ -1,3 +1,4 @@
+import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
 import { clamp } from './clamp.js';
 import {
     getDiscord,
@@ -23,6 +24,7 @@ import {
     registerFooterHelper
 } from './moduleInfo.js';
 import { createNotifier } from './notify.js';
+import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
 
 const log = createLogger(MODULE_ID);
@@ -55,7 +57,14 @@ const api = Object.freeze({
     injectOnce,
     quietCloseButton,
     clamp,
-    keyList
+    keyList,
+    openApps: getOpenApps,
+    openAppsOf: getOpenAppsOf,
+    refreshApps,
+    openModuleSettings,
+    readSetting,
+    writeSetting,
+    registerSettings
 });
 
 declare global {

@@ -40,7 +40,7 @@ export function toAppearance(raw) {
 function getWorldAppearance() {
     return toAppearance(readSetting(MODULE_ID, 'appearance', {}));
 }
-function getUserOverride() {
+export function getUserOverride() {
     const raw = readSetting(MODULE_ID, 'appearanceOverride', {});
     return {
         enabled: Boolean(raw.enabled),

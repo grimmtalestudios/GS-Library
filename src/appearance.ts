@@ -65,7 +65,7 @@ function getWorldAppearance(): ResolvedAppearance {
     return toAppearance(readSetting(MODULE_ID, 'appearance', {}));
 }
 
-function getUserOverride(): ResolvedAppearance & { enabled: boolean } {
+export function getUserOverride(): ResolvedAppearance & { enabled: boolean } {
     const raw = readSetting<{ enabled?: unknown }>(MODULE_ID, 'appearanceOverride', {});
 
     return {

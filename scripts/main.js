@@ -23,6 +23,7 @@ import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { fixSfxTriggers } from './shims.js';
 import { applyAppearance, clearAppearance, refreshAppearance } from './stamp.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
+import { migrateLegacyThemes, registerMigrationSetting } from './themeMigration.js';
 import { buildTokens } from './tokens.js';
 import { checkForUpdates, collectUpdates, isStudioModule, registerUpdateSettings } from './updates.js';
 const log = createLogger(MODULE_ID);
@@ -120,6 +121,7 @@ Hooks.once('init', () => {
         fonts: () => registerFonts(MODULE_ID),
         appearance: registerAppearanceSettings,
         presets: registerPresetSetting,
+        migration: registerMigrationSetting,
         settingsMenu: registerAppearanceMenu,
         updates: registerUpdateSettings
     });
@@ -129,5 +131,6 @@ Hooks.once('init', () => {
 Hooks.once('ready', () => {
     // fixSfxTriggers inspects listeners other modules register during init
     bootPhase(log, 'shims', fixSfxTriggers);
+    bootPhase(log, 'theme migration', migrateLegacyThemes);
     void checkForUpdates().catch((err) => log.debug('update check failed', err));
 });

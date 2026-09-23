@@ -1,8 +1,8 @@
+import { MODULE_ID } from './constants.js';
 import { registerFonts } from './fonts.js';
 import { createLocalizer } from './i18n.js';
 import { createLogger } from './logger.js';
-
-const MODULE_ID = 'GS-Library';
+import { createTheme, registerAppearanceSettings } from './theme.js';
 
 const log = createLogger(MODULE_ID);
 
@@ -11,7 +11,8 @@ const api = Object.freeze({
         return game.modules.get(MODULE_ID)?.version ?? '';
     },
     createLogger,
-    createLocalizer
+    createLocalizer,
+    createTheme
 });
 
 declare global {
@@ -28,6 +29,7 @@ Hooks.once('init', () => {
     }
 
     registerFonts(MODULE_ID);
+    registerAppearanceSettings();
     log.info(`v${api.version} ready`);
     Hooks.callAll(`${MODULE_ID}.ready`, api);
 });

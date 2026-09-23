@@ -44,6 +44,10 @@ declare const game: {
         localize(key: string): string;
         format(key: string, data?: Record<string, unknown>): string
     };
+    settings: {
+        register(namespace: string, key: string, data: object): void;
+        get(namespace: string, key: string): unknown;
+    };
     user: {
         isGM: boolean;
         name: string

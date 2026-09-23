@@ -1,14 +1,16 @@
+import { MODULE_ID } from './constants.js';
 import { registerFonts } from './fonts.js';
 import { createLocalizer } from './i18n.js';
 import { createLogger } from './logger.js';
-const MODULE_ID = 'GS-Library';
+import { createTheme, registerAppearanceSettings } from './theme.js';
 const log = createLogger(MODULE_ID);
 const api = Object.freeze({
     get version() {
         return game.modules.get(MODULE_ID)?.version ?? '';
     },
     createLogger,
-    createLocalizer
+    createLocalizer,
+    createTheme
 });
 // Set before init for other modules' init hooks
 globalThis.Grimmtale = api;
@@ -18,6 +20,7 @@ Hooks.once('init', () => {
         module.api = api;
     }
     registerFonts(MODULE_ID);
+    registerAppearanceSettings();
     log.info(`v${api.version} ready`);
     Hooks.callAll(`${MODULE_ID}.ready`, api);
 });

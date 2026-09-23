@@ -24,7 +24,9 @@
 .gs-library-appearance-columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: var(--gs-space-4);
+  min-height: 0;
 }
 
 .gs-library-appearance-column {
@@ -125,6 +127,22 @@
   border-radius: var(--gs-radius);
   background: transparent;
   cursor: pointer;
+}
+
+.gs-library-appearance-text {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gs-space-2);
+}
+
+.gs-library-appearance-text.is-set > .gs-library-appearance-custom {
+  color: var(--gs-ink);
+}
+
+.gs-library-appearance-text-follows {
+  color: var(--gs-faint);
+  font-size: var(--gs-text-xs);
 }
 
 .gs-library-appearance .gs-row {

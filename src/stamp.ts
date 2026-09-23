@@ -2,7 +2,7 @@ import { resolveAppearance, resolveTheme } from './appearance.js';
 import { DEFAULT_FINISH } from './finishes.js';
 import { ACCENTS, GROUNDS } from './palette.js';
 import { buildSurface, isSeeThrough } from './surface.js';
-import { type Appearance, buildTokens } from './tokens.js';
+import { type Appearance, buildTokens, TEXT_KEYS } from './tokens.js';
 
 interface StampOptions {
     themes?: string[];
@@ -12,7 +12,6 @@ interface StampOptions {
 }
 
 const STAMPED = '[data-gs-appearance], [data-gs-themes], [data-gs-module], [data-gs-overlay]';
-const TEXT_KEYS = ['ink', 'muted', 'faint', 'title'] as const;
 
 function isStudioDefault(appearance: Required<Appearance>): boolean {
     return appearance.ground === GROUNDS.warm.bg

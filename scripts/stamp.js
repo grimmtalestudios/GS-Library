@@ -2,9 +2,8 @@ import { resolveAppearance, resolveTheme } from './appearance.js';
 import { DEFAULT_FINISH } from './finishes.js';
 import { ACCENTS, GROUNDS } from './palette.js';
 import { buildSurface, isSeeThrough } from './surface.js';
-import { buildTokens } from './tokens.js';
+import { buildTokens, TEXT_KEYS } from './tokens.js';
 const STAMPED = '[data-gs-appearance], [data-gs-themes], [data-gs-module], [data-gs-overlay]';
-const TEXT_KEYS = ['ink', 'muted', 'faint', 'title'];
 function isStudioDefault(appearance) {
     return appearance.ground === GROUNDS.warm.bg
         && appearance.accent === ACCENTS.blood.value

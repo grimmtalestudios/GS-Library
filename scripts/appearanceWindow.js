@@ -12,7 +12,7 @@ import { ACCENTS, GROUNDS } from './palette.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
 import { buildSurface, isSeeThrough, toTranslucent } from './surface.js';
 import { createTheme } from './theme.js';
-import { buildTokens } from './tokens.js';
+import { buildTokens, TEXT_KEYS } from './tokens.js';
 const WINDOW_ID = `${MODULE_ID}-appearance`;
 const ICON = 'fa-solid fa-palette';
 const TEMPLATE = `modules/${MODULE_ID}/templates/appearance.hbs`;
@@ -60,6 +60,15 @@ function finishChoices(draft) {
         key,
         label: finish.label,
         active: key === draft.finish
+    }));
+}
+function textColourRows(draft) {
+    const tokens = buildTokens(draft);
+    return TEXT_KEYS.map((key) => ({
+        key,
+        label: loc(`text.${key}`),
+        colour: tokens[`--gs-${key}`],
+        isSet: Boolean(draft[key])
     }));
 }
 function scopeChoices(scope) {
@@ -168,6 +177,7 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
             pickColour: AppearanceWindow.onPickColour,
             pickFinish: AppearanceWindow.onPickFinish,
             pickScope: AppearanceWindow.onPickScope,
+            clearTextColour: AppearanceWindow.onClearTextColour,
             applyPreset: AppearanceWindow.onApplyPreset,
             savePreset: AppearanceWindow.onSavePreset,
             deletePreset: AppearanceWindow.onDeletePreset,
@@ -176,7 +186,10 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
         }
     };
     static PARTS = {
-        body: { template: TEMPLATE }
+        body: {
+            template: TEMPLATE,
+            scrollable: ['.gs-scroll']
+        }
     };
     draft = getInitialDraft();
     async _prepareContext(options) {
@@ -189,6 +202,7 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
                 swatchGroup('accent', ACCENT_SWATCHES, this.draft.accent)
             ],
             finishes: finishChoices(this.draft),
+            textColours: textColourRows(this.draft),
             scopes: scopeChoices(this.draft.scope),
             presets: listPresetChoices(this.draft)
         };
@@ -204,6 +218,7 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
         this.paint();
         for (const well of this.element.querySelectorAll('input[type="color"]')) {
             well.addEventListener('input', () => this.onWellInput(well));
+            well.addEventListener('change', () => void this.render());
         }
         getPresetNameField(this.element)?.addEventListener('keydown', (event) => this.onPresetNameKey(event));
     }
@@ -260,6 +275,10 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
     }
     static onPickScope(_event, target) {
         this.draft.scope = target.value;
+    }
+    static onClearTextColour(_event, target) {
+        this.draft[target.dataset.text] = '';
+        void this.render();
     }
     static onApplyPreset(_event, target) {
         const preset = listPresets().find((candidate) => candidate.id === target.dataset.preset);

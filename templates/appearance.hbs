@@ -1,6 +1,6 @@
 <div class="gs-shell gs-library-appearance">
   <div class="gs-library-appearance-columns">
-    <section class="gs-library-appearance-column">
+    <section class="gs-library-appearance-column gs-scroll">
       {{#each swatchGroups}}
         <fieldset class="gs-library-appearance-field">
           <legend class="gs-eyebrow">{{legend}}</legend>
@@ -14,7 +14,7 @@
             {{/each}}
           </div>
           <label class="gs-library-appearance-custom">
-            <input type="color" data-picks="{{picks}}" value="{{value}}" />
+            <input type="color" name="{{picks}}" data-picks="{{picks}}" value="{{value}}" />
             <span>{{custom}}</span>
           </label>
         </fieldset>
@@ -32,6 +32,24 @@
             </button>
           {{/each}}
         </div>
+      </fieldset>
+      <fieldset class="gs-library-appearance-field">
+        <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.text.legend"}}</legend>
+        {{#each textColours}}
+          <div class="gs-library-appearance-text{{#if isSet}} is-set{{/if}}">
+            <label class="gs-library-appearance-custom">
+              <input type="color" name="{{key}}" data-picks="{{key}}" value="{{colour}}" />
+              <span>{{label}}</span>
+            </label>
+            {{#if isSet}}
+              <button type="button" class="gs-btn ghost" data-action="clearTextColour" data-text="{{key}}">
+                <span>{{localize "GRIMMTALE.settings.text.auto"}}</span>
+              </button>
+            {{else}}
+              <span class="gs-library-appearance-text-follows">{{localize "GRIMMTALE.settings.text.following"}}</span>
+            {{/if}}
+          </div>
+        {{/each}}
       </fieldset>
       <fieldset class="gs-library-appearance-field">
         <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.scope.legend"}}</legend>

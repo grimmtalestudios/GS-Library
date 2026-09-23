@@ -1,6 +1,7 @@
 import { isDarkGround, lightnessOf, parseColour, pushToContrast, withLightness } from './colour.js';
 import { finishFor } from './finishes.js';
 import { accentPartner, ACCENTS, groundSet, GROUNDS } from './palette.js';
+export const TEXT_KEYS = ['ink', 'muted', 'faint', 'title'];
 const INK = {
     ink: '#ece4d0',
     muted: '#a89f89',

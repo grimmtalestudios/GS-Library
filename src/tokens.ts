@@ -12,6 +12,8 @@ export interface Appearance {
     title?: string;
 }
 
+export const TEXT_KEYS = ['ink', 'muted', 'faint', 'title'] as const;
+
 interface Ladder<T = string> {
     ink: T;
     muted: T;

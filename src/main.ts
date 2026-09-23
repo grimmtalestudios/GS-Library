@@ -1,4 +1,5 @@
 import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
+import { bootPhase, bootPhases, safeHook } from './boot.js';
 import { clamp } from './clamp.js';
 import {
     getDiscord,
@@ -46,6 +47,9 @@ const api = Object.freeze({
     footerContext: getFooterContext,
     registerFooterHelper,
     createLogger,
+    bootPhase,
+    bootPhases,
+    safeHook,
     createLocalizer,
     createNotifier,
     primaryGM: getPrimaryGM,
@@ -80,8 +84,10 @@ Hooks.once('init', () => {
         module.api = api;
     }
 
-    registerFonts(MODULE_ID);
-    registerAppearanceSettings();
+    bootPhases(log, {
+        fonts: () => registerFonts(MODULE_ID),
+        appearance: registerAppearanceSettings
+    });
     log.info(`v${api.version} ready`);
     Hooks.callAll(`${MODULE_ID}.ready`, api);
 });

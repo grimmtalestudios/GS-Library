@@ -8,6 +8,7 @@ import { trackInputMode } from './inputMode.js';
 import { createLogger } from './logger.js';
 import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
+import { deletePreset, listPresets, savePreset } from './presets.js';
 import { buildSurface, toTranslucent } from './surface.js';
 import { createTheme } from './theme.js';
 import { type Appearance, buildTokens } from './tokens.js';
@@ -90,6 +91,17 @@ function scopeChoices(scope: Scope) {
         label: loc(`scope.${value}`),
         active: value === scope
     }));
+}
+
+function listPresetChoices(draft: Draft) {
+    return listPresets().map((preset) => ({
+        ...preset,
+        active: preset.ground === draft.ground && preset.accent === draft.accent
+    }));
+}
+
+function getPresetNameField(root: HTMLElement): HTMLInputElement | null {
+    return root.querySelector<HTMLInputElement>('[name="presetName"]');
 }
 
 function setStyles(element: HTMLElement | null, styles: Record<string, string>): void {
@@ -176,6 +188,9 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
             pickColour: AppearanceWindow.onPickColour,
             pickFinish: AppearanceWindow.onPickFinish,
             pickScope: AppearanceWindow.onPickScope,
+            applyPreset: AppearanceWindow.onApplyPreset,
+            savePreset: AppearanceWindow.onSavePreset,
+            deletePreset: AppearanceWindow.onDeletePreset,
             reset: AppearanceWindow.onReset,
             cancel: AppearanceWindow.onCancel
         }
@@ -200,7 +215,8 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
                 swatchGroup('accent', ACCENT_SWATCHES, this.draft.accent)
             ],
             finishes: finishChoices(this.draft),
-            scopes: scopeChoices(this.draft.scope)
+            scopes: scopeChoices(this.draft.scope),
+            presets: listPresetChoices(this.draft)
         };
     }
 
@@ -218,11 +234,48 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
         for (const well of this.element.querySelectorAll<HTMLInputElement>('input[type="color"]')) {
             well.addEventListener('input', () => this.onWellInput(well));
         }
+
+        getPresetNameField(this.element)?.addEventListener('keydown', (event) => this.onPresetNameKey(event));
     }
 
     paint(): void {
         paintPreview(this.element, this.draft);
         paintFinishSamples(this.element, this.draft);
+    }
+
+    onPresetNameKey(event: KeyboardEvent): void {
+        if (event.key !== 'Enter') {
+            return;
+        }
+
+        // Stop Enter submitting the form (it closes the window)
+        event.preventDefault();
+        void this.saveDraftAsPreset();
+    }
+
+    async saveDraftAsPreset(): Promise<void> {
+        const field = getPresetNameField(this.element);
+        const name = field?.value.trim();
+
+        if (!name) {
+            field?.focus();
+
+            return;
+        }
+
+        await this.writePresets(() => savePreset(name, this.draft));
+    }
+
+    async writePresets(write: () => Promise<unknown>): Promise<void> {
+        try {
+            await write();
+        } catch (err) {
+            log.fail(loc('presetFailed'), err);
+
+            return;
+        }
+
+        void this.render();
     }
 
     // Re-rendering mid-drag closes the colour picker
@@ -252,6 +305,26 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
 
     static onPickScope(this: AppearanceWindow, _event: PointerEvent, target: HTMLInputElement): void {
         this.draft.scope = target.value as Scope;
+    }
+
+    static onApplyPreset(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
+        const preset = listPresets().find((candidate) => candidate.id === target.dataset.preset);
+
+        if (!preset) {
+            return;
+        }
+
+        this.draft.ground = preset.ground;
+        this.draft.accent = preset.accent;
+        void this.render();
+    }
+
+    static onSavePreset(this: AppearanceWindow): void {
+        void this.saveDraftAsPreset();
+    }
+
+    static onDeletePreset(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
+        void this.writePresets(() => deletePreset(target.dataset.preset ?? ''));
     }
 
     static onReset(this: AppearanceWindow): void {

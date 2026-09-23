@@ -65,6 +65,40 @@
           </div>
         </div>
       </div>
+      <fieldset class="gs-library-appearance-field">
+        <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.presets.legend"}}</legend>
+        {{#if presets.length}}
+          <ul class="gs-library-appearance-presets">
+            {{#each presets}}
+              <li class="gs-library-appearance-preset">
+                <button type="button" class="gs-library-appearance-preset-apply" data-action="applyPreset"
+                        data-preset="{{id}}" aria-pressed="{{active}}">
+                  <span class="gs-library-appearance-preset-chips">
+                    <span class="gs-library-appearance-preset-chip" style="background: {{ground}}"></span>
+                    <span class="gs-library-appearance-preset-chip" style="background: {{accent}}"></span>
+                  </span>
+                  <span>{{name}}</span>
+                </button>
+                <button type="button" class="gs-icon-btn dense" data-action="deletePreset" data-preset="{{id}}"
+                        data-tooltip="{{localize 'GRIMMTALE.settings.presets.forget'}}"
+                        aria-label="{{localize 'GRIMMTALE.settings.presets.forget'}} {{name}}">
+                  <i class="fa-solid fa-xmark" inert></i>
+                </button>
+              </li>
+            {{/each}}
+          </ul>
+        {{else}}
+          <p class="gs-hint">{{localize "GRIMMTALE.settings.presets.empty"}}</p>
+        {{/if}}
+        <div class="gs-library-appearance-preset-save">
+          <input type="text" name="presetName" maxlength="40" autocomplete="off"
+                 placeholder="{{localize 'GRIMMTALE.settings.presets.placeholder'}}"
+                 aria-label="{{localize 'GRIMMTALE.settings.presets.placeholder'}}" />
+          <button type="button" class="gs-btn ghost" data-action="savePreset">
+            <span>{{localize "GRIMMTALE.settings.presets.save"}}</span>
+          </button>
+        </div>
+      </fieldset>
     </section>
   </div>
   <div class="gs-library-appearance-buttons">

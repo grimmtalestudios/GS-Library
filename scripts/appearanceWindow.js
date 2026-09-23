@@ -8,6 +8,7 @@ import { trackInputMode } from './inputMode.js';
 import { createLogger } from './logger.js';
 import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
+import { deletePreset, listPresets, savePreset } from './presets.js';
 import { buildSurface, toTranslucent } from './surface.js';
 import { createTheme } from './theme.js';
 import { buildTokens } from './tokens.js';
@@ -67,6 +68,15 @@ function scopeChoices(scope) {
         label: loc(`scope.${value}`),
         active: value === scope
     }));
+}
+function listPresetChoices(draft) {
+    return listPresets().map((preset) => ({
+        ...preset,
+        active: preset.ground === draft.ground && preset.accent === draft.accent
+    }));
+}
+function getPresetNameField(root) {
+    return root.querySelector('[name="presetName"]');
 }
 function setStyles(element, styles) {
     for (const [name, value] of Object.entries(styles)) {
@@ -139,6 +149,9 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
             pickColour: AppearanceWindow.onPickColour,
             pickFinish: AppearanceWindow.onPickFinish,
             pickScope: AppearanceWindow.onPickScope,
+            applyPreset: AppearanceWindow.onApplyPreset,
+            savePreset: AppearanceWindow.onSavePreset,
+            deletePreset: AppearanceWindow.onDeletePreset,
             reset: AppearanceWindow.onReset,
             cancel: AppearanceWindow.onCancel
         }
@@ -157,7 +170,8 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
                 swatchGroup('accent', ACCENT_SWATCHES, this.draft.accent)
             ],
             finishes: finishChoices(this.draft),
-            scopes: scopeChoices(this.draft.scope)
+            scopes: scopeChoices(this.draft.scope),
+            presets: listPresetChoices(this.draft)
         };
     }
     _onFirstRender(context, options) {
@@ -172,10 +186,38 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
         for (const well of this.element.querySelectorAll('input[type="color"]')) {
             well.addEventListener('input', () => this.onWellInput(well));
         }
+        getPresetNameField(this.element)?.addEventListener('keydown', (event) => this.onPresetNameKey(event));
     }
     paint() {
         paintPreview(this.element, this.draft);
         paintFinishSamples(this.element, this.draft);
+    }
+    onPresetNameKey(event) {
+        if (event.key !== 'Enter') {
+            return;
+        }
+        // Stop Enter submitting the form (it closes the window)
+        event.preventDefault();
+        void this.saveDraftAsPreset();
+    }
+    async saveDraftAsPreset() {
+        const field = getPresetNameField(this.element);
+        const name = field?.value.trim();
+        if (!name) {
+            field?.focus();
+            return;
+        }
+        await this.writePresets(() => savePreset(name, this.draft));
+    }
+    async writePresets(write) {
+        try {
+            await write();
+        }
+        catch (err) {
+            log.fail(loc('presetFailed'), err);
+            return;
+        }
+        void this.render();
     }
     // Re-rendering mid-drag closes the colour picker
     onWellInput(well) {
@@ -198,6 +240,21 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
     }
     static onPickScope(_event, target) {
         this.draft.scope = target.value;
+    }
+    static onApplyPreset(_event, target) {
+        const preset = listPresets().find((candidate) => candidate.id === target.dataset.preset);
+        if (!preset) {
+            return;
+        }
+        this.draft.ground = preset.ground;
+        this.draft.accent = preset.accent;
+        void this.render();
+    }
+    static onSavePreset() {
+        void this.saveDraftAsPreset();
+    }
+    static onDeletePreset(_event, target) {
+        void this.writePresets(() => deletePreset(target.dataset.preset ?? ''));
     }
     static onReset() {
         this.draft = {

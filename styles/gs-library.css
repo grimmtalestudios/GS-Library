@@ -188,6 +188,95 @@
   gap: var(--gs-space-2);
 }
 
+.gs-library-appearance-field > .gs-hint {
+  margin: 0;
+}
+
+.gs-library-appearance-presets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gs-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gs-library-appearance-preset {
+  display: flex;
+  align-items: center;
+  gap: var(--gs-space-1);
+  padding-right: var(--gs-space-1);
+  border-radius: var(--gs-radius);
+  background: var(--gs-panel-raised);
+}
+
+.gs-library-appearance-preset-apply {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--gs-space-2);
+  min-width: 0;
+  height: auto;
+  min-height: 24px;
+  padding: var(--gs-space-1) var(--gs-space-2);
+  border: 0;
+  border-radius: var(--gs-radius);
+  background: transparent;
+  color: var(--gs-ink);
+  font-family: var(--gs-font-body-family);
+  font-weight: var(--gs-font-body-weight);
+  font-size: var(--gs-text);
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--gs-hover-ease) !important;
+}
+
+.gs-library-appearance-preset-apply:hover,
+.gs-library-appearance-preset-apply[aria-pressed="true"] {
+  background: var(--gs-panel-hover);
+}
+
+.gs-library-appearance-preset-apply > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gs-library-appearance-preset-chips {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.gs-library-appearance-preset-chip {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--gs-line-strong);
+  border-radius: var(--gs-radius);
+}
+
+.gs-library-appearance-preset-chip + .gs-library-appearance-preset-chip {
+  margin-left: calc(-1 * var(--gs-space-1));
+}
+
+.gs-library-appearance-preset-save {
+  display: flex;
+  gap: var(--gs-space-2);
+}
+
+.gs-library-appearance-preset-save > input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 var(--gs-space-2);
+}
+
+.gs-library-appearance-preset-save > input::placeholder {
+  color: var(--gs-faint);
+  opacity: 1;
+}
+
 .gs-library-appearance-buttons {
   display: flex;
   gap: var(--gs-space-2);

@@ -1,4 +1,5 @@
 import { registerFonts } from './fonts.js';
+import { createLocalizer } from './i18n.js';
 import { createLogger } from './logger.js';
 
 const MODULE_ID = 'GS-Library';
@@ -9,7 +10,8 @@ const api = Object.freeze({
     get version() {
         return game.modules.get(MODULE_ID)?.version ?? '';
     },
-    createLogger
+    createLogger,
+    createLocalizer
 });
 
 declare global {

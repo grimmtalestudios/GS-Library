@@ -1,15 +1,7 @@
+import { resolveTheme, THEMES } from './appearance.js';
 import { MODULE_ID } from './constants.js';
-const THEMES = ['dark', 'base'];
-function getAppearance() {
-    const override = game.settings.get(MODULE_ID, 'appearanceOverride');
-    return override.enabled ? override : game.settings.get(MODULE_ID, 'appearance');
-}
-function resolveTheme(moduleId) {
-    const own = getAppearance().modules?.[moduleId];
-    return typeof own === 'string' && THEMES.includes(own) ? own : THEMES[0];
-}
 function stampTheme(element, moduleId) {
-    element.dataset.theme = resolveTheme(moduleId);
+    element.dataset.theme = resolveTheme([THEMES.dark, THEMES.base], moduleId);
     element.dataset.gsModule = moduleId;
 }
 function restampThemes() {

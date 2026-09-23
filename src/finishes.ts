@@ -5,13 +5,14 @@ interface Finish {
     backdrop: string;
 }
 
-const DEFAULT_FINISH = 'flat';
+export const DEFAULT_FINISH = 'flat';
 
-export function finishFor(key: unknown, isDark: boolean): Finish {
+function finishesFor(isDark: boolean): Record<string, Finish> {
     const sheen = isDark ? '255, 255, 255' : '23, 21, 15';
     const at = (alpha: number): string => `rgba(${sheen}, ${alpha})`;
     const clear = at(0);
-    const table: Record<string, Finish> = {
+
+    return {
         flat: {
             label: 'Flat',
             alpha: 1,
@@ -44,6 +45,14 @@ export function finishFor(key: unknown, isDark: boolean): Finish {
             backdrop: ''
         }
     };
+}
 
-    return Object.hasOwn(table, String(key)) ? table[String(key)] : table[DEFAULT_FINISH];
+export function isFinish(key: unknown): boolean {
+    return Object.hasOwn(finishesFor(true), String(key));
+}
+
+export function finishFor(key: unknown, isDark: boolean): Finish {
+    const table = finishesFor(isDark);
+
+    return isFinish(key) ? table[String(key)] : table[DEFAULT_FINISH];
 }

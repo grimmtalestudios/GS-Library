@@ -1,3 +1,11 @@
+import {
+    getCurrentTokens,
+    resolveAppearance,
+    resolveTheme,
+    setAppearance,
+    setModuleTheme,
+    THEMES
+} from './appearance.js';
 import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
 import { auditTokens, scoreTokens } from './audit.js';
 import { bootPhase, bootPhases, safeHook } from './boot.js';
@@ -89,7 +97,13 @@ const api = Object.freeze({
     isPrimaryGM,
     hasActiveGM,
     gmIds: getGMIds,
+    THEMES,
     createTheme,
+    resolveAppearance,
+    resolveTheme,
+    setAppearance,
+    currentTokens: getCurrentTokens,
+    setModuleTheme,
     GROUNDS,
     ACCENTS,
     groundSet,

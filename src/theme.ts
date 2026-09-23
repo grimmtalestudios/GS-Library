@@ -1,31 +1,13 @@
+import { resolveTheme, THEMES } from './appearance.js';
 import { MODULE_ID } from './constants.js';
-
-interface Appearance {
-    enabled?: boolean;
-    modules?: Record<string, unknown>;
-}
 
 interface ThemeController {
     apply(app: { element: HTMLElement }): void;
     applyTo(element: HTMLElement): void;
 }
 
-const THEMES = ['dark', 'base'];
-
-function getAppearance(): Appearance {
-    const override = game.settings.get(MODULE_ID, 'appearanceOverride') as Appearance;
-
-    return override.enabled ? override : game.settings.get(MODULE_ID, 'appearance') as Appearance;
-}
-
-function resolveTheme(moduleId: string): string {
-    const own = getAppearance().modules?.[moduleId];
-
-    return typeof own === 'string' && THEMES.includes(own) ? own : THEMES[0];
-}
-
 function stampTheme(element: HTMLElement, moduleId: string): void {
-    element.dataset.theme = resolveTheme(moduleId);
+    element.dataset.theme = resolveTheme([THEMES.dark, THEMES.base], moduleId);
     element.dataset.gsModule = moduleId;
 }
 

@@ -2,7 +2,7 @@ import { isDarkGround, lightnessOf, parseColour, pushToContrast, withLightness }
 import { finishFor } from './finishes.js';
 import { accentPartner, ACCENTS, groundSet, GROUNDS } from './palette.js';
 
-interface Appearance {
+export interface Appearance {
     ground?: string;
     accent?: string;
     finish?: string;

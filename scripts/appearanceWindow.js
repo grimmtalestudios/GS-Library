@@ -1,4 +1,5 @@
 import { hasUserOverride, resolveAppearance, setAppearance, toAppearance } from './appearance.js';
+import { scoreTokens } from './audit.js';
 import { isDarkGround } from './colour.js';
 import { MODULE_ID } from './constants.js';
 import { quietCloseButton } from './dom.js';
@@ -9,7 +10,7 @@ import { createLogger } from './logger.js';
 import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
-import { buildSurface, toTranslucent } from './surface.js';
+import { buildSurface, isSeeThrough, toTranslucent } from './surface.js';
 import { createTheme } from './theme.js';
 import { buildTokens } from './tokens.js';
 const WINDOW_ID = `${MODULE_ID}-appearance`;
@@ -103,6 +104,24 @@ function paintFinishSamples(root, draft) {
         });
     }
 }
+function scoreNote(draft, score) {
+    if (score.failing) {
+        return loc('score.weakest', { name: score.weakest });
+    }
+    return isSeeThrough(draft) ? loc('score.seeThrough') : '';
+}
+function setText(element, text) {
+    if (element) {
+        element.textContent = text;
+    }
+}
+function paintScore(root, draft) {
+    const score = scoreTokens(buildTokens(draft));
+    root.querySelector('[data-score]')?.setAttribute('data-verdict', score.verdict);
+    setText(root.querySelector('[data-score-value]'), String(score.score));
+    setText(root.querySelector('[data-score-verdict]'), loc(`score.${score.verdict}`));
+    setText(root.querySelector('[data-score-note]'), scoreNote(draft, score));
+}
 function markSwatches(root, picks, current) {
     for (const swatch of root.querySelectorAll(`[data-action="pickColour"][data-picks="${picks}"]`)) {
         swatch.ariaPressed = String(swatch.dataset.colour === current);
@@ -191,6 +210,7 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
     paint() {
         paintPreview(this.element, this.draft);
         paintFinishSamples(this.element, this.draft);
+        paintScore(this.element, this.draft);
     }
     onPresetNameKey(event) {
         if (event.key !== 'Enter') {

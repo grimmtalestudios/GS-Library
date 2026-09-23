@@ -116,7 +116,7 @@
         {{else}}
           <p class="gs-hint">{{localize "GRIMMTALE.settings.presets.empty"}}</p>
         {{/if}}
-        <div class="gs-library-appearance-preset-save">
+        <div class="gs-library-appearance-input-row">
           <input type="text" name="presetName" maxlength="40" autocomplete="off"
                  placeholder="{{localize 'GRIMMTALE.settings.presets.placeholder'}}"
                  aria-label="{{localize 'GRIMMTALE.settings.presets.placeholder'}}" />
@@ -124,6 +124,29 @@
             <span>{{localize "GRIMMTALE.settings.presets.save"}}</span>
           </button>
         </div>
+      </fieldset>
+      <fieldset class="gs-library-appearance-field">
+        <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.share.legend"}}</legend>
+        <div class="gs-library-appearance-share">
+          <label for="{{partId}}-share-code">{{localize "GRIMMTALE.settings.share.give"}}</label>
+          <div class="gs-library-appearance-input-row">
+            <input type="text" id="{{partId}}-share-code" data-share-code readonly />
+            <button type="button" class="gs-btn ghost" data-action="copyShareCode">
+              <span>{{localize "GRIMMTALE.settings.share.copy"}}</span>
+            </button>
+          </div>
+        </div>
+        <div class="gs-library-appearance-share">
+          <label for="{{partId}}-share-input">{{localize "GRIMMTALE.settings.share.take"}}</label>
+          <div class="gs-library-appearance-input-row">
+            <input type="text" id="{{partId}}-share-input" name="shareInput" autocomplete="off"
+                   placeholder="{{localize 'GRIMMTALE.settings.share.placeholder'}}" />
+            <button type="button" class="gs-btn ghost" data-action="applyShareCode">
+              <span>{{localize "GRIMMTALE.settings.share.apply"}}</span>
+            </button>
+          </div>
+        </div>
+        <p class="gs-hint">{{localize "GRIMMTALE.settings.share.note"}}</p>
       </fieldset>
     </section>
   </div>

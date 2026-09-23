@@ -61,6 +61,12 @@ export function toAppearance(raw: unknown): ResolvedAppearance {
     };
 }
 
+export function toLook(raw: unknown): Required<Appearance> {
+    const { modules: _modules, ...look } = toAppearance(raw);
+
+    return look;
+}
+
 function getWorldAppearance(): ResolvedAppearance {
     return toAppearance(readSetting(MODULE_ID, 'appearance', {}));
 }

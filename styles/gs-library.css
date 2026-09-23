@@ -320,21 +320,34 @@
   margin-left: calc(-1 * var(--gs-space-1));
 }
 
-.gs-library-appearance-preset-save {
+.gs-library-appearance-input-row {
   display: flex;
   gap: var(--gs-space-2);
 }
 
-.gs-library-appearance-preset-save > input {
+.gs-library-appearance-input-row > input {
   flex: 1 1 auto;
   min-width: 0;
   height: 28px;
   padding: 0 var(--gs-space-2);
 }
 
-.gs-library-appearance-preset-save > input::placeholder {
+.gs-library-appearance-input-row > input::placeholder {
   color: var(--gs-faint);
   opacity: 1;
+}
+
+.gs-library-appearance-share {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gs-space-1);
+  font-size: var(--gs-text-sm);
+  color: var(--gs-muted);
+}
+
+.gs-library-appearance .gs-library-appearance-share input {
+  font-family: var(--gs-font-mono);
+  font-size: var(--gs-text-xs);
 }
 
 .gs-library-appearance-buttons {

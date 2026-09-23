@@ -1,4 +1,4 @@
-import { toAppearance } from './appearance.js';
+import { toAppearance, toLook } from './appearance.js';
 import { MODULE_ID } from './constants.js';
 import { readSetting, writeSetting } from './settings.js';
 import type { Appearance } from './tokens.js';
@@ -16,12 +16,11 @@ function toName(value: unknown): string {
 
 function toPreset(raw: unknown): Preset {
     const entry = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
-    const { modules: _modules, ...look } = toAppearance(entry);
 
     return {
         id: String(entry.id ?? ''),
         name: toName(entry.name),
-        ...look
+        ...toLook(entry)
     };
 }
 

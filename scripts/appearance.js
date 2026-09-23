@@ -37,6 +37,10 @@ export function toAppearance(raw) {
         modules: themesOf(value.modules)
     };
 }
+export function toLook(raw) {
+    const { modules: _modules, ...look } = toAppearance(raw);
+    return look;
+}
 function getWorldAppearance() {
     return toAppearance(readSetting(MODULE_ID, 'appearance', {}));
 }

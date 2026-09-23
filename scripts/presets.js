@@ -1,4 +1,4 @@
-import { toAppearance } from './appearance.js';
+import { toAppearance, toLook } from './appearance.js';
 import { MODULE_ID } from './constants.js';
 import { readSetting, writeSetting } from './settings.js';
 const PRESETS = 'appearancePresets';
@@ -7,11 +7,10 @@ function toName(value) {
 }
 function toPreset(raw) {
     const entry = (raw && typeof raw === 'object' ? raw : {});
-    const { modules: _modules, ...look } = toAppearance(entry);
     return {
         id: String(entry.id ?? ''),
         name: toName(entry.name),
-        ...look
+        ...toLook(entry)
     };
 }
 // Date.now() alone repeats within a millisecond

@@ -88,6 +88,9 @@ declare const CONFIG: {
 
 declare const game: {
     version: string;
+    clipboard: {
+        copyPlainText(text: string): Promise<void>;
+    };
     system: {
         id: string;
         version: string;

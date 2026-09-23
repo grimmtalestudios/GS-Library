@@ -1,4 +1,4 @@
-import { hasUserOverride, resolveAppearance, setAppearance, toAppearance } from './appearance.js';
+import { hasUserOverride, resolveAppearance, setAppearance, toLook } from './appearance.js';
 import { scoreTokens } from './audit.js';
 import { isDarkGround } from './colour.js';
 import { MODULE_ID } from './constants.js';
@@ -10,6 +10,7 @@ import { createLogger } from './logger.js';
 import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
+import { parseShareCode, toShareCode } from './shareCode.js';
 import { buildSurface, isSeeThrough, toTranslucent } from './surface.js';
 import { createTheme } from './theme.js';
 import { buildTokens, TEXT_KEYS } from './tokens.js';
@@ -28,9 +29,6 @@ const loc = createLocalizer('GRIMMTALE.settings');
 const log = createLogger(MODULE_ID);
 const theme = createTheme(MODULE_ID);
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
-function toLook({ modules: _modules, ...look }) {
-    return look;
-}
 function getInitialScope() {
     if (hasUserOverride()) {
         return 'user';
@@ -88,6 +86,19 @@ function listPresetChoices(draft) {
 function getPresetNameField(root) {
     return root.querySelector('[name="presetName"]');
 }
+function getShareInput(root) {
+    return root.querySelector('[name="shareInput"]');
+}
+function bindEnterKey(field, action) {
+    field?.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') {
+            return;
+        }
+        // Stop Enter submitting the form (it closes the window)
+        event.preventDefault();
+        action();
+    });
+}
 function setStyles(element, styles) {
     for (const [name, value] of Object.entries(styles)) {
         element?.style.setProperty(name, value);
@@ -122,6 +133,12 @@ function scoreNote(draft, score) {
 function setText(element, text) {
     if (element) {
         element.textContent = text;
+    }
+}
+function paintShareCode(root, draft) {
+    const field = root.querySelector('[data-share-code]');
+    if (field) {
+        field.value = toShareCode(draft);
     }
 }
 function paintScore(root, draft) {
@@ -181,6 +198,8 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
             applyPreset: AppearanceWindow.onApplyPreset,
             savePreset: AppearanceWindow.onSavePreset,
             deletePreset: AppearanceWindow.onDeletePreset,
+            copyShareCode: AppearanceWindow.onCopyShareCode,
+            applyShareCode: AppearanceWindow.onApplyShareCode,
             reset: AppearanceWindow.onReset,
             cancel: AppearanceWindow.onCancel
         }
@@ -220,20 +239,14 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
             well.addEventListener('input', () => this.onWellInput(well));
             well.addEventListener('change', () => void this.render());
         }
-        getPresetNameField(this.element)?.addEventListener('keydown', (event) => this.onPresetNameKey(event));
+        bindEnterKey(getPresetNameField(this.element), () => void this.saveDraftAsPreset());
+        bindEnterKey(getShareInput(this.element), () => this.applyShareCode());
     }
     paint() {
         paintPreview(this.element, this.draft);
         paintFinishSamples(this.element, this.draft);
         paintScore(this.element, this.draft);
-    }
-    onPresetNameKey(event) {
-        if (event.key !== 'Enter') {
-            return;
-        }
-        // Stop Enter submitting the form (it closes the window)
-        event.preventDefault();
-        void this.saveDraftAsPreset();
+        paintShareCode(this.element, this.draft);
     }
     async saveDraftAsPreset() {
         const field = getPresetNameField(this.element);
@@ -252,6 +265,23 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
             log.fail(loc('presetFailed'), err);
             return;
         }
+        void this.render();
+    }
+    applyShareCode() {
+        const field = getShareInput(this.element);
+        const code = field?.value ?? '';
+        const look = parseShareCode(code);
+        if (!look) {
+            if (code.trim()) {
+                ui.notifications?.warn(loc('share.notALook'));
+            }
+            field?.focus();
+            return;
+        }
+        this.draft = {
+            ...look,
+            scope: this.draft.scope
+        };
         void this.render();
     }
     // Re-rendering mid-drag closes the colour picker
@@ -295,9 +325,16 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
     static onDeletePreset(_event, target) {
         void this.writePresets(() => deletePreset(target.dataset.preset ?? ''));
     }
+    static async onCopyShareCode() {
+        await game.clipboard.copyPlainText(toShareCode(this.draft));
+        ui.notifications?.info(loc('share.copied'));
+    }
+    static onApplyShareCode() {
+        this.applyShareCode();
+    }
     static onReset() {
         this.draft = {
-            ...toLook(toAppearance({})),
+            ...toLook({}),
             scope: this.draft.scope
         };
         void this.render();

@@ -40,6 +40,7 @@ import { createNotifier } from './notify.js';
 import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, isPeerActive, publishApi } from './peer.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
+import { checkForUpdates, collectUpdates, isStudioModule, registerUpdateSettings } from './updates.js';
 
 const log = createLogger(MODULE_ID);
 
@@ -96,6 +97,9 @@ const api = Object.freeze({
     readSetting,
     writeSetting,
     registerSettings,
+    checkForUpdates,
+    collectUpdates,
+    isStudioModule,
     peerActive: isPeerActive,
     peerApi: getPeerApi,
     peerMethod: getPeerMethod,
@@ -119,8 +123,13 @@ Hooks.once('init', () => {
 
     bootPhases(log, {
         fonts: () => registerFonts(MODULE_ID),
-        appearance: registerAppearanceSettings
+        appearance: registerAppearanceSettings,
+        updates: registerUpdateSettings
     });
     log.info(`v${api.version} ready`);
     Hooks.callAll(`${MODULE_ID}.ready`, api);
+});
+
+Hooks.once('ready', () => {
+    void checkForUpdates().catch((err: unknown) => log.debug('update check failed', err));
 });

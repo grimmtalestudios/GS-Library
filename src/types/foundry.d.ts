@@ -1,4 +1,7 @@
 declare namespace foundry {
+    namespace utils {
+        function isNewerVersion(v1: string, v0: string): boolean;
+    }
     namespace applications {
         const instances: Map<string, FoundryApp>;
         namespace api {
@@ -32,6 +35,10 @@ interface FoundryModule {
     id: string;
     title: string;
     version: string;
+    manifest: string;
+    relationships: {
+        requires: Set<{ id: string }>;
+    };
     active: boolean;
     api?: unknown;
 }
@@ -86,7 +93,8 @@ declare const game: {
         viewed: FoundryCombat | null;
     };
     modules: {
-        get(id: string): FoundryModule | undefined
+        get(id: string): FoundryModule | undefined;
+        filter(predicate: (module: FoundryModule) => boolean): FoundryModule[];
     };
     i18n: {
         localize(key: string): string;

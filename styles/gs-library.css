@@ -1,3 +1,18 @@
-.gs-module-name-app {
-  
+.gs-update-notice .window-content {
+  padding: var(--gs-space-3);
+}
+
+.gs-update-notice .gs-update-list {
+  margin: var(--gs-space-3) 0;
+  padding-left: var(--gs-space-4);
+  list-style: none;
+}
+
+.gs-update-notice .gs-update-list li {
+  padding: var(--gs-space-1) 0;
+}
+
+.gs-update-notice :is(.gs-update-from, .gs-update-where) {
+  color: var(--gs-muted);
+  font-size: var(--gs-text-sm);
 }

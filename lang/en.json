@@ -1,1 +1,11 @@
-{}
+{
+  "GRIMMTALE.settings.updateCheck.hint": "When the world loads, quietly ask whether any Grimmtale module has a newer version. Only the GM is told, at most once every six hours, and nothing is installed.",
+  "GRIMMTALE.settings.updateCheck.name": "Tell the GM about module updates",
+  "GRIMMTALE.updates.bodyMany": "{count} Grimmtale modules have newer versions.",
+  "GRIMMTALE.updates.bodyOne": "One Grimmtale module has a newer version.",
+  "GRIMMTALE.updates.dismiss": "Skip these versions",
+  "GRIMMTALE.updates.installed": "you have {version}",
+  "GRIMMTALE.updates.later": "Remind me later",
+  "GRIMMTALE.updates.title": "Updates waiting",
+  "GRIMMTALE.updates.where": "Updates install from the Setup screen, under Add-on Modules."
+}

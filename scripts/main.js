@@ -1,7 +1,10 @@
+import { clamp } from './clamp.js';
 import { getDiscord, getWebsite, MODULE_ID, STUDIO, STUDIO_DISCORD, STUDIO_SHORT, STUDIO_WEBSITE } from './constants.js';
+import { findFirst, injectOnce, quietCloseButton } from './dom.js';
 import { registerFonts } from './fonts.js';
 import { getGMIds, getPrimaryGM, hasActiveGM, isPrimaryGM } from './gm.js';
 import { createLocalizer } from './i18n.js';
+import { keyList } from './keyList.js';
 import { createLogger } from './logger.js';
 import { getFooterContext, getModuleTitle, getModuleVersion, getStudioFooter, isModuleActive, registerFooterHelper } from './moduleInfo.js';
 import { createNotifier } from './notify.js';
@@ -30,7 +33,12 @@ const api = Object.freeze({
     isPrimaryGM,
     hasActiveGM,
     gmIds: getGMIds,
-    createTheme
+    createTheme,
+    findFirst,
+    injectOnce,
+    quietCloseButton,
+    clamp,
+    keyList
 });
 // Set before init for other modules' init hooks
 globalThis.Grimmtale = api;

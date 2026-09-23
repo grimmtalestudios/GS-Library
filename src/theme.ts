@@ -1,11 +1,33 @@
+import { resolveAppearance, resolveTheme, setAppearance, THEMES } from './appearance.js';
 import { MODULE_ID } from './constants.js';
 import { applyAppearance, refreshAppearance } from './stamp.js';
 
+interface ThemeOptions {
+    themes?: string[];
+    labelFor?: (next: string) => string;
+    iconFor?: (next: string) => string;
+}
+
+interface ThemeContext {
+    theme: string;
+    next: string;
+    icon: string;
+    label: string;
+}
+
 interface ThemeController {
+    current(): string;
     apply(app: { element: HTMLElement }): string;
     applyTo(element: HTMLElement, options?: { overlay?: boolean }): string;
     applyToOverlay(element: HTMLElement): string;
+    toggle(): Promise<unknown>;
+    context(): ThemeContext;
 }
+
+const ICONS: Record<string, string> = {
+    [THEMES.dark]: 'fa-solid fa-moon',
+    [THEMES.base]: 'fa-solid fa-scroll'
+};
 
 export function registerAppearanceSettings(): void {
     for (const [key, scope] of [['appearance', 'world'], ['appearanceOverride', 'client']]) {
@@ -19,18 +41,60 @@ export function registerAppearanceSettings(): void {
     }
 }
 
-export function createTheme(moduleId: string): ThemeController {
+export function createTheme(moduleId: string, options: ThemeOptions = {}): ThemeController {
+    const { themes = [THEMES.dark, THEMES.base], labelFor, iconFor } = options;
+    const current = () => resolveTheme(themes, moduleId);
+
+    const getNext = () => {
+        const theme = current();
+
+        return themes.find((candidate) => candidate !== theme) ?? theme;
+    };
+
     return {
-        apply: (app) => applyAppearance(app.element, { moduleId }),
+        current,
+        apply: (app) => applyAppearance(app.element, {
+            themes,
+            moduleId
+        }),
         applyTo: (element, { overlay = false } = {}) => applyAppearance(element, {
+            themes,
             moduleId,
             overlay
         }),
 
         // We skip the backdrop blur over the canvas, where it repaints every frame
         applyToOverlay: (element) => applyAppearance(element, {
+            themes,
             moduleId,
             overlay: true
-        })
+        }),
+
+        // The toggle saves this user's choice, not the world's
+        toggle: async () => {
+            const next = getNext();
+
+            if (next === current()) {
+                return undefined;
+            }
+
+            return setAppearance({
+                enabled: true,
+                modules: {
+                    ...resolveAppearance().modules,
+                    [moduleId]: next
+                }
+            });
+        },
+        context: () => {
+            const next = getNext();
+
+            return {
+                theme: current(),
+                next,
+                icon: iconFor?.(next) ?? ICONS[next] ?? '',
+                label: labelFor?.(next) ?? ''
+            };
+        }
     };
 }

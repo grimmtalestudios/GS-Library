@@ -1,6 +1,7 @@
 import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
 import { bootPhase, bootPhases, safeHook } from './boot.js';
 import { clamp } from './clamp.js';
+import { bindCombatTurns, getCombatantToken, getViewedCombat } from './combat.js';
 import {
     getDiscord,
     getWebsite,
@@ -50,6 +51,9 @@ const api = Object.freeze({
     bootPhase,
     bootPhases,
     safeHook,
+    onCombatTurnChange: bindCombatTurns,
+    viewedCombat: getViewedCombat,
+    combatantToken: getCombatantToken,
     createLocalizer,
     createNotifier,
     primaryGM: getPrimaryGM,

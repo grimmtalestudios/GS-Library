@@ -34,6 +34,24 @@ interface FoundryUser {
     active: boolean;
 }
 
+interface FoundryCombatant {
+    id: string;
+    tokenId: string | null;
+    actorId: string | null;
+}
+
+interface FoundryCombat {
+    id: string;
+    round: number;
+    turn: number | null;
+    started: boolean;
+    combatant: FoundryCombatant | undefined;
+}
+
+interface FoundryToken {
+    id: string;
+}
+
 interface FontDefinition {
     editor: boolean;
     fonts: {
@@ -53,6 +71,10 @@ declare const CONFIG: {
 };
 
 declare const game: {
+    combat: FoundryCombat | null;
+    combats: {
+        viewed: FoundryCombat | null;
+    };
     modules: {
         get(id: string): FoundryModule | undefined
     };
@@ -71,6 +93,12 @@ declare const game: {
     users: {
         activeGM: FoundryUser | null;
         filter(predicate: (user: FoundryUser) => boolean): FoundryUser[];
+    };
+};
+
+declare const canvas: {
+    tokens?: {
+        get(id: string): FoundryToken | undefined;
     };
 };
 

@@ -2,6 +2,7 @@ import { MODULE_ID } from './constants.js';
 import { registerFonts } from './fonts.js';
 import { createLocalizer } from './i18n.js';
 import { createLogger } from './logger.js';
+import { createNotifier } from './notify.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
 const log = createLogger(MODULE_ID);
 const api = Object.freeze({
@@ -10,6 +11,7 @@ const api = Object.freeze({
     },
     createLogger,
     createLocalizer,
+    createNotifier,
     createTheme
 });
 // Set before init for other modules' init hooks

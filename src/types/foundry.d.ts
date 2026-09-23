@@ -61,10 +61,14 @@ declare const Hooks: {
     callAll(hook: string, ...args: any[]): boolean;
 };
 
+interface PostedNotification {
+    element?: HTMLElement;
+}
+
 declare const ui: {
     notifications?: {
-        info(message: string): void;
-        warn(message: string): void;
-        error(message: string): void
+        info(message: string): PostedNotification;
+        warn(message: string): PostedNotification;
+        error(message: string): PostedNotification
     };
 };

@@ -75,14 +75,14 @@ function findDesignedGround(hex: string): GroundSet | undefined {
 }
 
 function deriveGround(bg: string): GroundSet {
-    const l = lightnessOf(bg);
+    const lightness = lightnessOf(bg);
     const isDark = isDarkGround(bg);
 
     // Module stylesheets use pale ink in .window-header
     return {
         bg,
-        bgAlt: withLightness(bg, isDark ? l + 0.035 : l - 0.045),
-        header: withLightness(bg, Math.min(0.12, Math.max(0.055, isDark ? l + 0.03 : 0.085)))
+        bgAlt: withLightness(bg, isDark ? lightness + 0.035 : lightness - 0.045),
+        header: withLightness(bg, Math.min(0.12, Math.max(0.055, isDark ? lightness + 0.03 : 0.085)))
     };
 }
 

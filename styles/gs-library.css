@@ -157,6 +157,7 @@
 }
 
 .gs-library-appearance-preview {
+  flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--gs-line-strong);
   box-shadow: var(--gs-elev-2);

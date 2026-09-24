@@ -258,7 +258,7 @@ export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) 
     static PARTS = {
         body: {
             template: TEMPLATE,
-            scrollable: ['.gs-scroll']
+            scrollable: ['.gs-library-appearance-column:first-child', '.gs-library-appearance-column:last-child']
         }
     };
 

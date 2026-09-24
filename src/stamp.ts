@@ -85,8 +85,13 @@ function dressElement(root: HTMLElement, appearance: Required<Appearance>, overl
     }
 }
 
+// Detached windows have a separate HTMLElement class
+function isElement(value: unknown): value is HTMLElement {
+    return (value as Node | null)?.nodeType === Node.ELEMENT_NODE;
+}
+
 export function clearAppearance(element: unknown): void {
-    if (!(element instanceof HTMLElement)) {
+    if (!isElement(element)) {
         return;
     }
 
@@ -100,7 +105,7 @@ export function clearAppearance(element: unknown): void {
 export function applyAppearance(element: unknown, options: StampOptions = {}): string {
     const theme = options.theme ?? resolveTheme(options.themes, options.moduleId);
 
-    if (!(element instanceof HTMLElement)) {
+    if (!isElement(element)) {
         return theme;
     }
 

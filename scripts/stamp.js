@@ -61,8 +61,12 @@ function dressElement(root, appearance, overlay) {
         });
     }
 }
+// Detached windows have a separate HTMLElement class
+function isElement(value) {
+    return value?.nodeType === Node.ELEMENT_NODE;
+}
 export function clearAppearance(element) {
-    if (!(element instanceof HTMLElement)) {
+    if (!isElement(element)) {
         return;
     }
     removeStyles(element, 'gsAppearance');
@@ -72,7 +76,7 @@ export function clearAppearance(element) {
 }
 export function applyAppearance(element, options = {}) {
     const theme = options.theme ?? resolveTheme(options.themes, options.moduleId);
-    if (!(element instanceof HTMLElement)) {
+    if (!isElement(element)) {
         return theme;
     }
     markElement(element, theme, options);

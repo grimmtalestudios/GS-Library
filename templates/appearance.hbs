@@ -165,6 +165,10 @@
     </button>
   </div>
   <footer class="gs-footer">
-    <a href="{{website}}" target="_blank" rel="noopener noreferrer">{{footer}}</a>
+    {{#if website}}
+      <a href="{{website}}" target="_blank" rel="noopener noreferrer">{{footer}}</a>
+    {{else}}
+      {{footer}}
+    {{/if}}
   </footer>
 </div>

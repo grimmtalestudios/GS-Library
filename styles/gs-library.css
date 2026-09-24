@@ -112,6 +112,10 @@
   border-radius: var(--gs-radius);
 }
 
+.gs-library-appearance-chip[data-finish-sample="glassy"] {
+  filter: blur(0.4px);
+}
+
 .gs-library-appearance-chequer {
   display: block;
   width: 100%;

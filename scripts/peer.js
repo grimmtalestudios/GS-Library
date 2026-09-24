@@ -1,9 +1,6 @@
 import { MODULE_ID } from './constants.js';
 import { createLogger } from './logger.js';
 const log = createLogger(MODULE_ID);
-export function isPeerActive(moduleId) {
-    return Boolean(game.modules.get(moduleId)?.active);
-}
 export function getPeerApi(moduleId) {
     const module = game.modules.get(moduleId);
     if (!module?.active) {

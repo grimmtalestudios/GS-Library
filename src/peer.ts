@@ -13,10 +13,6 @@ interface PublishOptions {
 
 const log = createLogger(MODULE_ID);
 
-export function isPeerActive(moduleId: string): boolean {
-    return Boolean(game.modules.get(moduleId)?.active);
-}
-
 export function getPeerApi(moduleId: string): PeerApi | null {
     const module = game.modules.get(moduleId);
     if (!module?.active) {

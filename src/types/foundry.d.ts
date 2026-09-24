@@ -28,6 +28,7 @@ interface FoundryApp {
 }
 
 interface SettingsSheet extends FoundryApp {
+    element: HTMLElement;
     changeTab(tab: string, group: string, options?: { force?: boolean }): void;
 }
 

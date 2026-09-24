@@ -1,3 +1,4 @@
+import { clamp } from './clamp.js';
 import { colourOr, isDarkGround, lightnessOf, pushToContrast, withLightness } from './colour.js';
 export const GROUNDS = Object.freeze({
     warm: {
@@ -69,7 +70,7 @@ function deriveGround(bg) {
     return {
         bg,
         bgAlt: withLightness(bg, isDark ? lightness + 0.035 : lightness - 0.045),
-        header: withLightness(bg, Math.min(0.12, Math.max(0.055, isDark ? lightness + 0.03 : 0.085)))
+        header: withLightness(bg, clamp(isDark ? lightness + 0.03 : 0.085, 0.055, 0.12))
     };
 }
 export function groundSet(hex) {

@@ -129,6 +129,11 @@
   cursor: pointer;
 }
 
+.gs-library-appearance-window[data-input="keyboard"] input[type="color"]:focus-visible {
+  outline: 2px solid var(--gs-accent);
+  outline-offset: 2px;
+}
+
 .gs-library-appearance-text {
   display: flex;
   align-items: center;

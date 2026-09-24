@@ -152,6 +152,8 @@
 .gs-library-appearance .gs-row input[type="radio"] {
   flex: 0 0 auto;
   margin: 0;
+  border: 0;
+  background: none;
 }
 
 .gs-library-appearance-preview {

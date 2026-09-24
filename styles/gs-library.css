@@ -327,6 +327,10 @@
   white-space: nowrap;
 }
 
+.gs-library-appearance-preset [data-action="deletePreset"]:hover {
+  color: var(--gs-bad);
+}
+
 .gs-library-appearance-preset-chips {
   display: inline-flex;
   flex: 0 0 auto;

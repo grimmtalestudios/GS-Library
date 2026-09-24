@@ -1,5 +1,6 @@
 import { MODULE_ID, PACKAGES_HOST } from './constants.js';
 import { isPrimaryGM } from './gm.js';
+import { trackInputMode } from './inputMode.js';
 import { createLogger } from './logger.js';
 import { getModuleTitle } from './moduleInfo.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
@@ -162,7 +163,10 @@ async function reportUpdates(updates: PendingUpdate[]): Promise<void> {
                 label: 'GRIMMTALE.updates.dismiss'
             }
         ],
-        render: (_event: Event, dialog: { element: HTMLElement }) => theme.apply(dialog),
+        render: (_event: Event, dialog: { element: HTMLElement }) => {
+            theme.apply(dialog);
+            trackInputMode(dialog.element);
+        },
         rejectClose: false
     });
 

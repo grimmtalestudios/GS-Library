@@ -66,7 +66,7 @@ export function bindCombatTurns(callback, { notifyOnEnd = true } = {}) {
     return () => Object.entries(hookIds).forEach(([hook, id]) => Hooks.off(hook, id));
 }
 export function getViewedCombat() {
-    return game.combats.viewed ?? game.combat;
+    return game.combats?.viewed ?? game.combat; // game.combats is created after init
 }
 export function getCombatantToken(combatant) {
     if (!combatant?.tokenId) {

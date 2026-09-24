@@ -97,7 +97,7 @@ export function bindCombatTurns(callback: TurnListener, { notifyOnEnd = true } =
 }
 
 export function getViewedCombat(): FoundryCombat | null {
-    return game.combats.viewed ?? game.combat;
+    return game.combats?.viewed ?? game.combat; // game.combats is created after init
 }
 
 export function getCombatantToken(combatant: FoundryCombatant | null | undefined): FoundryToken | null {

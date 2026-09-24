@@ -1,4 +1,4 @@
-import { isDarkGround, lightnessOf, parseColour, pushToContrast, withLightness } from './colour.js';
+import { colourOr, isDarkGround, lightnessOf, parseColour, pushToContrast, withLightness } from './colour.js';
 import { finishFor } from './finishes.js';
 import { accentPartner, ACCENTS, groundSet, GROUNDS } from './palette.js';
 
@@ -45,10 +45,6 @@ const SEMANTIC = {
 };
 const SEMANTIC_TARGET = 3;
 const TITLE_INK = '#ece4d0';
-
-function chosenOr(value: unknown, derived: string): string {
-    return parseColour(value) ? String(value).toLowerCase() : derived;
-}
 
 function isBehind(a: string, b: string, away: number): boolean {
     return (lightnessOf(a) - lightnessOf(b)) * away < LADDER_STEP;
@@ -98,9 +94,9 @@ export function buildTokens(appearance: Appearance = {}): Record<string, string>
         '--gs-panel-hover': panel(0.11),
         '--gs-line': panel(0.12),
         '--gs-line-strong': panel(0.22),
-        '--gs-ink': chosenOr(appearance.ink, ladder.ink),
-        '--gs-muted': chosenOr(appearance.muted, ladder.muted),
-        '--gs-faint': chosenOr(appearance.faint, ladder.faint),
+        '--gs-ink': colourOr(appearance.ink, ladder.ink),
+        '--gs-muted': colourOr(appearance.muted, ladder.muted),
+        '--gs-faint': colourOr(appearance.faint, ladder.faint),
         '--gs-accent': accent,
         '--gs-accent-strong': accentPartner(accent, bg),
         '--gs-good': pushToContrast(SEMANTIC.good, bg, SEMANTIC_TARGET),
@@ -108,6 +104,6 @@ export function buildTokens(appearance: Appearance = {}): Record<string, string>
         '--gs-bad': pushToContrast(SEMANTIC.bad, bg, SEMANTIC_TARGET),
         '--gs-header': ground.header,
         '--gs-header-surface': isSeeThrough ? 'rgba(0, 0, 0, 0.28)' : ground.header,
-        '--gs-title': chosenOr(appearance.title, TITLE_INK)
+        '--gs-title': colourOr(appearance.title, TITLE_INK)
     };
 }

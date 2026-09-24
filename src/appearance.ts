@@ -1,4 +1,4 @@
-import { parseColour } from './colour.js';
+import { colourOr } from './colour.js';
 import { MODULE_ID } from './constants.js';
 import { DEFAULT_FINISH, isFinish } from './finishes.js';
 import { ACCENTS, GROUNDS } from './palette.js';
@@ -26,10 +26,6 @@ const FOLLOW = 'follow';
 
 function isTheme(value: unknown): value is string {
     return value === THEMES.dark || value === THEMES.base;
-}
-
-function colourOr(value: unknown, fallback: string): string {
-    return parseColour(value) ? String(value).toLowerCase() : fallback;
 }
 
 function groundOf(value: unknown): string {

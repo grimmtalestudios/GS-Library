@@ -1,4 +1,4 @@
-import { parseColour } from './colour.js';
+import { colourOr } from './colour.js';
 import { MODULE_ID } from './constants.js';
 import { DEFAULT_FINISH, isFinish } from './finishes.js';
 import { ACCENTS, GROUNDS } from './palette.js';
@@ -11,9 +11,6 @@ export const THEMES = Object.freeze({
 const FOLLOW = 'follow';
 function isTheme(value) {
     return value === THEMES.dark || value === THEMES.base;
-}
-function colourOr(value, fallback) {
-    return parseColour(value) ? String(value).toLowerCase() : fallback;
 }
 function groundOf(value) {
     // Older settings store a key such as 'warm'

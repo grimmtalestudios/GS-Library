@@ -1,4 +1,4 @@
-import { isDarkGround, lightnessOf, parseColour, pushToContrast, withLightness } from './colour.js';
+import { colourOr, isDarkGround, lightnessOf, pushToContrast, withLightness } from './colour.js';
 export const GROUNDS = Object.freeze({
     warm: {
         label: 'Warm black',
@@ -72,7 +72,7 @@ function deriveGround(bg) {
     };
 }
 export function groundSet(hex) {
-    const bg = parseColour(hex) ? String(hex).toLowerCase() : GROUNDS.warm.bg;
+    const bg = colourOr(hex, GROUNDS.warm.bg);
     const designed = findDesignedGround(bg);
     if (!designed) {
         return deriveGround(bg);

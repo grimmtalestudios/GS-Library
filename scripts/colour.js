@@ -14,6 +14,9 @@ export function parseColour(value) {
         b
     };
 }
+export function colourOr(value, fallback) {
+    return parseColour(value) ? String(value).toLowerCase() : fallback;
+}
 function toChannelHex(value) {
     return Math.round(Math.min(255, Math.max(0, value))).toString(16).padStart(2, '0');
 }

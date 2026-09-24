@@ -1,4 +1,4 @@
-import { isDarkGround, lightnessOf, parseColour, pushToContrast, withLightness } from './colour.js';
+import { colourOr, isDarkGround, lightnessOf, pushToContrast, withLightness } from './colour.js';
 
 interface GroundSet {
     bg: string;
@@ -85,7 +85,7 @@ function deriveGround(bg: string): GroundSet {
 }
 
 export function groundSet(hex: unknown): GroundSet {
-    const bg = parseColour(hex) ? String(hex).toLowerCase() : GROUNDS.warm.bg;
+    const bg = colourOr(hex, GROUNDS.warm.bg);
     const designed = findDesignedGround(bg);
 
     if (!designed) {

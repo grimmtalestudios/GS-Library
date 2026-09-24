@@ -31,6 +31,10 @@ export function parseColour(value: unknown): Rgb | null {
     };
 }
 
+export function colourOr(value: unknown, fallback: string): string {
+    return parseColour(value) ? String(value).toLowerCase() : fallback;
+}
+
 function toChannelHex(value: number): string {
     return Math.round(Math.min(255, Math.max(0, value))).toString(16).padStart(2, '0');
 }

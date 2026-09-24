@@ -66,6 +66,8 @@ export const ACCENTS = Object.freeze({
     }
 });
 
+const HOVER_LIFT = 0.104;
+
 function findDesignedGround(hex: string): GroundSet | undefined {
     const bg = hex.toLowerCase();
 
@@ -98,8 +100,6 @@ export function groundSet(hex: unknown): GroundSet {
         header: designed.header
     };
 }
-
-const HOVER_LIFT = 0.104;
 
 export function accentPartner(accent: string, bg: string): string {
     const isDark = isDarkGround(bg);

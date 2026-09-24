@@ -1,5 +1,4 @@
 const TURN_FIELDS = ['turn', 'round', 'active', 'combatants'];
-const lastDelivered = new WeakMap();
 // combat.turn can stay the same when combatants change
 function getSignature(combat) {
     return [combat.id, combat.round, combat.turn, combat.combatant?.id ?? '-', combat.started].join(':');
@@ -29,37 +28,40 @@ function getCombatEnd(combat) {
         ended: true
     };
 }
-function deliverTurn(combat, callback) {
+function deliverTurn(combat, callback, delivered) {
     const signature = getSignature(combat);
-    if (!combat.started || lastDelivered.get(combat) === signature) {
+    if (!combat.started || delivered.get(combat) === signature) {
         return;
     }
-    lastDelivered.set(combat, signature);
+    delivered.set(combat, signature);
     callback(getTurnChange(combat));
 }
-function deliverEnd(combat, callback, notifyOnEnd) {
+function deliverEnd(combat, callback, delivered, notifyOnEnd) {
     // Forget the combat so a restart reports its first turn
-    lastDelivered.delete(combat);
+    delivered.delete(combat);
     if (notifyOnEnd) {
         callback(getCombatEnd(combat));
     }
 }
 export function bindCombatTurns(callback, { notifyOnEnd = true } = {}) {
+    const delivered = new WeakMap();
+    const onTurn = (combat) => deliverTurn(combat, callback, delivered);
+    const onEnd = (combat) => deliverEnd(combat, callback, delivered, notifyOnEnd);
     const onUpdate = (combat, changed) => {
         if (!TURN_FIELDS.some((field) => field in changed)) {
             return;
         }
         if (changed.active === false) {
-            deliverEnd(combat, callback, notifyOnEnd);
+            onEnd(combat);
             return;
         }
-        deliverTurn(combat, callback);
+        onTurn(combat);
     };
     const hookIds = {
         // combatTurnChange waits for the GM and skips combatant changes
         updateCombat: Hooks.on('updateCombat', onUpdate),
-        combatTurnChange: Hooks.on('combatTurnChange', (combat) => deliverTurn(combat, callback)),
-        deleteCombat: Hooks.on('deleteCombat', (combat) => deliverEnd(combat, callback, notifyOnEnd))
+        combatTurnChange: Hooks.on('combatTurnChange', onTurn),
+        deleteCombat: Hooks.on('deleteCombat', onEnd)
     };
     return () => Object.entries(hookIds).forEach(([hook, id]) => Hooks.off(hook, id));
 }

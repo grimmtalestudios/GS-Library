@@ -10,10 +10,9 @@ export interface TurnChange {
 }
 
 type TurnListener = (change: TurnChange) => void;
+type Delivered = WeakMap<FoundryCombat, string>;
 
 const TURN_FIELDS = ['turn', 'round', 'active', 'combatants'];
-
-const lastDelivered = new WeakMap<FoundryCombat, string>();
 
 // combat.turn can stay the same when combatants change
 function getSignature(combat: FoundryCombat): string {
@@ -48,21 +47,21 @@ function getCombatEnd(combat: FoundryCombat): TurnChange {
     };
 }
 
-function deliverTurn(combat: FoundryCombat, callback: TurnListener): void {
+function deliverTurn(combat: FoundryCombat, callback: TurnListener, delivered: Delivered): void {
     const signature = getSignature(combat);
 
-    if (!combat.started || lastDelivered.get(combat) === signature) {
+    if (!combat.started || delivered.get(combat) === signature) {
         return;
     }
 
-    lastDelivered.set(combat, signature);
+    delivered.set(combat, signature);
     callback(getTurnChange(combat));
 }
 
-function deliverEnd(combat: FoundryCombat, callback: TurnListener, notifyOnEnd: boolean): void {
+function deliverEnd(combat: FoundryCombat, callback: TurnListener, delivered: Delivered, notifyOnEnd: boolean): void {
 
     // Forget the combat so a restart reports its first turn
-    lastDelivered.delete(combat);
+    delivered.delete(combat);
 
     if (notifyOnEnd) {
         callback(getCombatEnd(combat));
@@ -70,25 +69,28 @@ function deliverEnd(combat: FoundryCombat, callback: TurnListener, notifyOnEnd: 
 }
 
 export function bindCombatTurns(callback: TurnListener, { notifyOnEnd = true } = {}): () => void {
+    const delivered: Delivered = new WeakMap();
+    const onTurn = (combat: FoundryCombat) => deliverTurn(combat, callback, delivered);
+    const onEnd = (combat: FoundryCombat) => deliverEnd(combat, callback, delivered, notifyOnEnd);
     const onUpdate = (combat: FoundryCombat, changed: Record<string, unknown>) => {
         if (!TURN_FIELDS.some((field) => field in changed)) {
             return;
         }
 
         if (changed.active === false) {
-            deliverEnd(combat, callback, notifyOnEnd);
+            onEnd(combat);
 
             return;
         }
 
-        deliverTurn(combat, callback);
+        onTurn(combat);
     };
     const hookIds = {
 
         // combatTurnChange waits for the GM and skips combatant changes
         updateCombat: Hooks.on('updateCombat', onUpdate),
-        combatTurnChange: Hooks.on('combatTurnChange', (combat: FoundryCombat) => deliverTurn(combat, callback)),
-        deleteCombat: Hooks.on('deleteCombat', (combat: FoundryCombat) => deliverEnd(combat, callback, notifyOnEnd))
+        combatTurnChange: Hooks.on('combatTurnChange', onTurn),
+        deleteCombat: Hooks.on('deleteCombat', onEnd)
     };
 
     return () => Object.entries(hookIds).forEach(([hook, id]) => Hooks.off(hook, id));

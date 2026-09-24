@@ -46,7 +46,6 @@ interface FoundryModule {
 
 interface FoundryUser {
     id: string;
-    name: string;
     isGM: boolean;
     active: boolean;
 }
@@ -75,12 +74,6 @@ interface FontDefinition {
         urls: string[];
         weight?: string;
     }[];
-}
-
-interface SceneControls {
-    tokens: {
-        tools: Record<string, {}>;
-    }
 }
 
 declare const CONFIG: {

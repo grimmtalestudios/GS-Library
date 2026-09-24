@@ -13,7 +13,7 @@
   background-image: var(--gs-grain);
 }
 
-.gs-update-notice .window-content {
+.gs-shared-base.gs-update-notice .window-content {
   padding: var(--gs-space-3);
 }
 
@@ -392,6 +392,6 @@
   margin-right: auto;
 }
 
-.gs-library-appearance .gs-footer {
+.gs-shared-base.gs-library-appearance-window .gs-footer {
   margin-top: 0;
 }

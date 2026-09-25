@@ -14,6 +14,7 @@ import { getGMIds, getPrimaryGM, hasActiveGM, isPrimaryGM } from './gm.js';
 import { createLocalizer } from './i18n.js';
 import { bindInputMode } from './inputMode.js';
 import { keyList } from './keyList.js';
+import { consumeKey } from './keys.js';
 import { createLogger } from './logger.js';
 import { getFooterContext, getModuleTitle, getModuleVersion, getStudioFooter, isModuleActive, registerFooterHelper } from './moduleInfo.js';
 import { createNotifier } from './notify.js';
@@ -96,6 +97,7 @@ const api = Object.freeze({
     bindInputMode,
     bindFrame,
     clamp: Math.clamp,
+    consumeKey,
     keyList,
     markSaving,
     clearSaving,

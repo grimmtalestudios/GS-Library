@@ -20,6 +20,7 @@ import { createNotifier } from './notify.js';
 import { ACCENTS, groundSet, GROUNDS } from './palette.js';
 import { bindPeerReady, callPeer, getPeerApi, getPeerMethod, publishApi } from './peer.js';
 import { deletePreset, listPresets, registerPresetSetting, savePreset } from './presets.js';
+import { clearSaving, isSaving, markSaving, whileSaving } from './saving.js';
 import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { fixSfxTriggers } from './shims.js';
 import { applyAppearance, clearAppearance, refreshAppearance } from './stamp.js';
@@ -96,6 +97,10 @@ const api = Object.freeze({
     bindFrame,
     clamp: Math.clamp,
     keyList,
+    markSaving,
+    clearSaving,
+    isSaving,
+    whileSaving,
     openApps: getOpenApps,
     openAppsOf: getOpenAppsOf,
     refreshApps,

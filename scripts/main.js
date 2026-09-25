@@ -113,10 +113,6 @@ const api = Object.freeze({
 // Set before init for other modules' init hooks
 globalThis.Grimmtale = api;
 Hooks.once('init', () => {
-    const module = game.modules.get(MODULE_ID);
-    if (module) {
-        module.api = api;
-    }
     bootPhases(log, {
         fonts: () => registerFonts(MODULE_ID),
         appearance: registerAppearanceSettings,
@@ -126,7 +122,7 @@ Hooks.once('init', () => {
         updates: registerUpdateSettings
     });
     log.info(`v${api.version} ready`);
-    Hooks.callAll(`${MODULE_ID}.ready`, api);
+    publishApi(MODULE_ID, api);
 });
 Hooks.once('ready', () => {
     // fixSfxTriggers inspects listeners other modules register during init

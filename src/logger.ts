@@ -1,6 +1,6 @@
 type Level = 'error' | 'warn' | 'info' | 'debug';
 
-export interface LoggerOptions {
+interface LoggerOptions {
     isDebugEnabled?: () => boolean;
     title?: string;
     style?: string;

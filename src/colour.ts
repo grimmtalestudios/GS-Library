@@ -39,7 +39,7 @@ function toChannelHex(value: number): string {
     return Math.round(Math.clamp(value, 0, 255)).toString(16).padStart(2, '0');
 }
 
-export function toHex({ r, g, b }: Rgb): string {
+function toHex({ r, g, b }: Rgb): string {
     return `#${toChannelHex(r)}${toChannelHex(g)}${toChannelHex(b)}`;
 }
 
@@ -49,7 +49,7 @@ function toLinear(channel: number): number {
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
 }
 
-export function luminance({ r, g, b }: Rgb): number {
+function luminance({ r, g, b }: Rgb): number {
     return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 

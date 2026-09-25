@@ -20,14 +20,14 @@ export function colourOr(value, fallback) {
 function toChannelHex(value) {
     return Math.round(Math.clamp(value, 0, 255)).toString(16).padStart(2, '0');
 }
-export function toHex({ r, g, b }) {
+function toHex({ r, g, b }) {
     return `#${toChannelHex(r)}${toChannelHex(g)}${toChannelHex(b)}`;
 }
 function toLinear(channel) {
     const c = channel / 255;
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
 }
-export function luminance({ r, g, b }) {
+function luminance({ r, g, b }) {
     return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 export function contrast(a, b) {

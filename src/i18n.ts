@@ -1,4 +1,4 @@
-export type Localizer = (key: string, data?: Record<string, unknown>) => string;
+type Localizer = (key: string, data?: Record<string, unknown>) => string;
 
 export function createLocalizer(prefix: string): Localizer {
     return (key, data) => {

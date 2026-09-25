@@ -171,7 +171,7 @@ async function saveDraft({ scope, ...look }) {
         enabled: true
     } : { enabled: false });
 }
-export class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
+class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: WINDOW_ID,
         tag: 'form',

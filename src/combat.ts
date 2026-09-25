@@ -1,4 +1,4 @@
-export interface TurnChange {
+interface TurnChange {
     combat: FoundryCombat;
     combatant: FoundryCombatant | null;
     tokenId: string | null;

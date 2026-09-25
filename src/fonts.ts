@@ -1,7 +1,9 @@
-export function registerFonts(moduleId: string): void {
+import { MODULE_ID } from './constants.js';
+
+export function registerFonts(): void {
 
     // Relative so they work under a route prefix
-    const url = (file: string) => `modules/${moduleId}/fonts/${file}.woff2`;
+    const url = (file: string) => `modules/${MODULE_ID}/fonts/${file}.woff2`;
 
     CONFIG.fontDefinitions.Inter = {
         editor: true,

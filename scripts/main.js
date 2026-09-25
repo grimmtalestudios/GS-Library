@@ -113,7 +113,7 @@ const api = Object.freeze({
 globalThis.Grimmtale = api;
 Hooks.once('init', () => {
     bootPhases(log, {
-        fonts: () => registerFonts(MODULE_ID),
+        fonts: registerFonts,
         appearance: registerAppearanceSettings,
         presets: registerPresetSetting,
         migration: registerMigrationSetting,

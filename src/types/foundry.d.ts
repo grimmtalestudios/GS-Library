@@ -1,6 +1,7 @@
 declare namespace foundry {
     namespace utils {
         function isNewerVersion(v1: string, v0: string): boolean;
+        function randomID(): string;
     }
     namespace applications {
         const instances: Map<string, FoundryApp>;

@@ -13,10 +13,6 @@ function toPreset(raw) {
         ...toLook(entry)
     };
 }
-// Date.now() alone repeats within a millisecond
-function createPresetId() {
-    return `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-}
 export function registerPresetSetting() {
     game.settings.register(MODULE_ID, PRESETS, {
         scope: 'client',
@@ -38,7 +34,7 @@ export async function savePreset(name, look) {
     const existing = presets.findIndex((preset) => preset.name.toLowerCase() === label.toLowerCase());
     const preset = toPreset({
         ...toAppearance(look),
-        id: presets[existing]?.id ?? createPresetId(),
+        id: presets[existing]?.id ?? foundry.utils.randomID(),
         name: label
     });
     if (existing >= 0) {

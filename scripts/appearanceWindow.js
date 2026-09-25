@@ -5,7 +5,7 @@ import { MODULE_ID } from './constants.js';
 import { quietCloseButton } from './dom.js';
 import { finishesFor } from './finishes.js';
 import { createLocalizer } from './i18n.js';
-import { trackInputMode } from './inputMode.js';
+import { bindInputMode } from './inputMode.js';
 import { createLogger } from './logger.js';
 import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
@@ -229,7 +229,7 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     _onFirstRender(context, options) {
         super._onFirstRender(context, options);
         theme.apply(this);
-        trackInputMode(this.element);
+        bindInputMode(this.element);
         quietCloseButton(this.element);
     }
     _onRender(context, options) {

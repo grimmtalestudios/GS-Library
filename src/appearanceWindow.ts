@@ -2,10 +2,9 @@ import { hasUserOverride, resolveAppearance, setAppearance, toLook } from './app
 import { markSwatches, paintDraft } from './appearancePaint.js';
 import { isDarkGround } from './colour.js';
 import { MODULE_ID } from './constants.js';
-import { quietCloseButton } from './dom.js';
 import { finishesFor } from './finishes.js';
+import { bindFrame } from './frame.js';
 import { createLocalizer } from './i18n.js';
-import { bindInputMode } from './inputMode.js';
 import { createLogger } from './logger.js';
 import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
@@ -216,9 +215,7 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
     _onFirstRender(context: unknown, options: unknown): void {
         super._onFirstRender(context, options);
-        theme.apply(this);
-        bindInputMode(this.element);
-        quietCloseButton(this.element);
+        bindFrame(this, theme);
     }
 
     _onRender(context: unknown, options: unknown): void {

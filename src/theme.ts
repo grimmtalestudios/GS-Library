@@ -15,7 +15,7 @@ interface ThemeContext {
     label: string;
 }
 
-interface ThemeController {
+export interface ThemeController {
     current(): string;
     apply(app: { element: HTMLElement }): string;
     applyTo(element: HTMLElement, options?: { overlay?: boolean }): string;

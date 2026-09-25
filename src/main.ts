@@ -34,6 +34,7 @@ import {
 } from './constants.js';
 import { findFirst, injectOnce, quietCloseButton } from './dom.js';
 import { registerFonts } from './fonts.js';
+import { bindFrame } from './frame.js';
 import { getGMIds, getPrimaryGM, hasActiveGM, isPrimaryGM } from './gm.js';
 import { createLocalizer } from './i18n.js';
 import { bindInputMode } from './inputMode.js';
@@ -126,6 +127,7 @@ const api = Object.freeze({
     injectOnce,
     quietCloseButton,
     bindInputMode,
+    bindFrame,
     clamp: Math.clamp,
     keyList,
     openApps: getOpenApps,

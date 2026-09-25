@@ -1,5 +1,5 @@
 import { hasUserOverride, resolveAppearance, setAppearance, toLook } from './appearance.js';
-import { scoreTokens } from './audit.js';
+import { markSwatches, paintDraft } from './appearancePaint.js';
 import { isDarkGround } from './colour.js';
 import { MODULE_ID } from './constants.js';
 import { quietCloseButton } from './dom.js';
@@ -11,7 +11,6 @@ import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
 import { parseShareCode, toShareCode } from './shareCode.js';
-import { buildSurface, isSeeThrough, toTranslucent } from './surface.js';
 import { createTheme } from './theme.js';
 import { type Appearance, buildTokens, TEXT_KEYS } from './tokens.js';
 
@@ -129,74 +128,6 @@ function bindEnterKey(field: HTMLInputElement | null, action: () => void): void 
     });
 }
 
-function setStyles(element: HTMLElement | null, styles: Record<string, string>): void {
-    for (const [name, value] of Object.entries(styles)) {
-        element?.style.setProperty(name, value);
-    }
-}
-
-function paintPreview(root: HTMLElement, draft: Draft): void {
-    const tokens = buildTokens(draft);
-    const surface = buildSurface(draft, true);
-
-    setStyles(root.querySelector<HTMLElement>('[data-preview]'), tokens);
-    setStyles(root.querySelector<HTMLElement>('[data-preview-body]'), surface.content);
-    setStyles(root.querySelector<HTMLElement>('[data-preview-header]'), {
-        'background-color': surface.header,
-        '--gs-ink': tokens['--gs-title']
-    });
-}
-
-function paintFinishSamples(root: HTMLElement, draft: Draft): void {
-    const finishes = finishesFor(isDarkGround(draft.ground));
-
-    for (const sample of root.querySelectorAll<HTMLElement>('[data-finish-sample]')) {
-        const finish = finishes[sample.dataset.finishSample ?? ''];
-
-        setStyles(sample, {
-            'background-color': toTranslucent(draft.ground, finish.alpha),
-            'background-image': finish.image
-        });
-    }
-}
-
-function scoreNote(draft: Draft, score: ReturnType<typeof scoreTokens>): string {
-    if (score.failing) {
-        return loc('score.weakest', { name: score.weakest });
-    }
-
-    return isSeeThrough(draft) ? loc('score.seeThrough') : '';
-}
-
-function setText(element: Element | null, text: string): void {
-    if (element) {
-        element.textContent = text;
-    }
-}
-
-function paintShareCode(root: HTMLElement, draft: Draft): void {
-    const field = root.querySelector<HTMLInputElement>('[data-share-code]');
-
-    if (field) {
-        field.value = toShareCode(draft);
-    }
-}
-
-function paintScore(root: HTMLElement, draft: Draft): void {
-    const score = scoreTokens(buildTokens(draft));
-
-    root.querySelector('[data-score]')?.setAttribute('data-verdict', score.verdict);
-    setText(root.querySelector('[data-score-value]'), String(score.score));
-    setText(root.querySelector('[data-score-verdict]'), loc(`score.${score.verdict}`));
-    setText(root.querySelector('[data-score-note]'), scoreNote(draft, score));
-}
-
-function markSwatches(root: HTMLElement, picks: ColourKey, current: string): void {
-    for (const swatch of root.querySelectorAll<HTMLElement>(`[data-action="pickColour"][data-picks="${picks}"]`)) {
-        swatch.ariaPressed = String(swatch.dataset.colour === current);
-    }
-}
-
 function markSaving(form: HTMLFormElement): void {
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
@@ -292,7 +223,7 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
     _onRender(context: unknown, options: unknown): void {
         super._onRender(context, options);
-        this.paint();
+        paintDraft(this.element, this.draft);
 
         for (const well of this.element.querySelectorAll<HTMLInputElement>('input[type="color"]')) {
             well.addEventListener('input', () => this.onWellInput(well));
@@ -301,13 +232,6 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
         bindEnterKey(getPresetNameField(this.element), () => void this.saveDraftAsPreset());
         bindEnterKey(getShareInput(this.element), () => this.applyShareCode());
-    }
-
-    paint(): void {
-        paintPreview(this.element, this.draft);
-        paintFinishSamples(this.element, this.draft);
-        paintScore(this.element, this.draft);
-        paintShareCode(this.element, this.draft);
     }
 
     async saveDraftAsPreset(): Promise<void> {
@@ -357,12 +281,13 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         void this.render();
     }
 
-    // Re-rendering mid-drag closes the colour picker
     onWellInput(well: HTMLInputElement): void {
         const picks = well.dataset.picks as ColourKey;
 
         this.draft[picks] = well.value;
-        this.paint();
+
+        // Re-rendering mid-drag closes the colour picker
+        paintDraft(this.element, this.draft);
         markSwatches(this.element, picks, well.value);
     }
 

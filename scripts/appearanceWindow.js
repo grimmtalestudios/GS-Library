@@ -1,5 +1,5 @@
 import { hasUserOverride, resolveAppearance, setAppearance, toLook } from './appearance.js';
-import { scoreTokens } from './audit.js';
+import { markSwatches, paintDraft } from './appearancePaint.js';
 import { isDarkGround } from './colour.js';
 import { MODULE_ID } from './constants.js';
 import { quietCloseButton } from './dom.js';
@@ -11,7 +11,6 @@ import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
 import { parseShareCode, toShareCode } from './shareCode.js';
-import { buildSurface, isSeeThrough, toTranslucent } from './surface.js';
 import { createTheme } from './theme.js';
 import { buildTokens, TEXT_KEYS } from './tokens.js';
 const WINDOW_ID = `${MODULE_ID}-appearance`;
@@ -99,60 +98,6 @@ function bindEnterKey(field, action) {
         action();
     });
 }
-function setStyles(element, styles) {
-    for (const [name, value] of Object.entries(styles)) {
-        element?.style.setProperty(name, value);
-    }
-}
-function paintPreview(root, draft) {
-    const tokens = buildTokens(draft);
-    const surface = buildSurface(draft, true);
-    setStyles(root.querySelector('[data-preview]'), tokens);
-    setStyles(root.querySelector('[data-preview-body]'), surface.content);
-    setStyles(root.querySelector('[data-preview-header]'), {
-        'background-color': surface.header,
-        '--gs-ink': tokens['--gs-title']
-    });
-}
-function paintFinishSamples(root, draft) {
-    const finishes = finishesFor(isDarkGround(draft.ground));
-    for (const sample of root.querySelectorAll('[data-finish-sample]')) {
-        const finish = finishes[sample.dataset.finishSample ?? ''];
-        setStyles(sample, {
-            'background-color': toTranslucent(draft.ground, finish.alpha),
-            'background-image': finish.image
-        });
-    }
-}
-function scoreNote(draft, score) {
-    if (score.failing) {
-        return loc('score.weakest', { name: score.weakest });
-    }
-    return isSeeThrough(draft) ? loc('score.seeThrough') : '';
-}
-function setText(element, text) {
-    if (element) {
-        element.textContent = text;
-    }
-}
-function paintShareCode(root, draft) {
-    const field = root.querySelector('[data-share-code]');
-    if (field) {
-        field.value = toShareCode(draft);
-    }
-}
-function paintScore(root, draft) {
-    const score = scoreTokens(buildTokens(draft));
-    root.querySelector('[data-score]')?.setAttribute('data-verdict', score.verdict);
-    setText(root.querySelector('[data-score-value]'), String(score.score));
-    setText(root.querySelector('[data-score-verdict]'), loc(`score.${score.verdict}`));
-    setText(root.querySelector('[data-score-note]'), scoreNote(draft, score));
-}
-function markSwatches(root, picks, current) {
-    for (const swatch of root.querySelectorAll(`[data-action="pickColour"][data-picks="${picks}"]`)) {
-        swatch.ariaPressed = String(swatch.dataset.colour === current);
-    }
-}
 function markSaving(form) {
     const button = form.querySelector('button[type="submit"]');
     button?.toggleAttribute('disabled', true);
@@ -234,19 +179,13 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     }
     _onRender(context, options) {
         super._onRender(context, options);
-        this.paint();
+        paintDraft(this.element, this.draft);
         for (const well of this.element.querySelectorAll('input[type="color"]')) {
             well.addEventListener('input', () => this.onWellInput(well));
             well.addEventListener('change', () => void this.render());
         }
         bindEnterKey(getPresetNameField(this.element), () => void this.saveDraftAsPreset());
         bindEnterKey(getShareInput(this.element), () => this.applyShareCode());
-    }
-    paint() {
-        paintPreview(this.element, this.draft);
-        paintFinishSamples(this.element, this.draft);
-        paintScore(this.element, this.draft);
-        paintShareCode(this.element, this.draft);
     }
     async saveDraftAsPreset() {
         const field = getPresetNameField(this.element);
@@ -284,11 +223,11 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
         };
         void this.render();
     }
-    // Re-rendering mid-drag closes the colour picker
     onWellInput(well) {
         const picks = well.dataset.picks;
         this.draft[picks] = well.value;
-        this.paint();
+        // Re-rendering mid-drag closes the colour picker
+        paintDraft(this.element, this.draft);
         markSwatches(this.element, picks, well.value);
     }
     static onPickColour(_event, target) {

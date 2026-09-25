@@ -3,7 +3,6 @@ import { openAppearanceWindow, registerAppearanceMenu } from './appearanceWindow
 import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
 import { auditTokens, scoreTokens } from './audit.js';
 import { bootPhase, bootPhases, safeHook } from './boot.js';
-import { clamp } from './clamp.js';
 import { contrast } from './colour.js';
 import { bindCombatTurns, getCombatantToken, getViewedCombat } from './combat.js';
 import { confirmDialog, getDialogV2, getDragData, getFilePicker, getFormDataExtended, getGeneration, getTextEditor, isAtLeast, toElement } from './compat.js';
@@ -91,7 +90,7 @@ const api = Object.freeze({
     findFirst,
     injectOnce,
     quietCloseButton,
-    clamp,
+    clamp: Math.clamp,
     keyList,
     openApps: getOpenApps,
     openAppsOf: getOpenAppsOf,

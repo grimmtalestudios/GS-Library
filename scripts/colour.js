@@ -1,4 +1,3 @@
-import { clamp } from './clamp.js';
 const SHORT_HEX = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i;
 const FULL_HEX = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i;
 export function parseColour(value) {
@@ -19,7 +18,7 @@ export function colourOr(value, fallback) {
     return parseColour(value) ? String(value).toLowerCase() : fallback;
 }
 function toChannelHex(value) {
-    return Math.round(clamp(value, 0, 255)).toString(16).padStart(2, '0');
+    return Math.round(Math.clamp(value, 0, 255)).toString(16).padStart(2, '0');
 }
 export function toHex({ r, g, b }) {
     return `#${toChannelHex(r)}${toChannelHex(g)}${toChannelHex(b)}`;
@@ -94,7 +93,7 @@ export function withLightness(hex, lightness) {
     }
     return toHex(toRgb({
         ...toHsl(rgb),
-        l: clamp(lightness, 0, 1)
+        l: Math.clamp(lightness, 0, 1)
     }));
 }
 export function lightnessOf(hex) {

@@ -1,5 +1,3 @@
-import { clamp } from './clamp.js';
-
 interface Rgb {
     r: number;
     g: number;
@@ -38,7 +36,7 @@ export function colourOr(value: unknown, fallback: string): string {
 }
 
 function toChannelHex(value: number): string {
-    return Math.round(clamp(value, 0, 255)).toString(16).padStart(2, '0');
+    return Math.round(Math.clamp(value, 0, 255)).toString(16).padStart(2, '0');
 }
 
 export function toHex({ r, g, b }: Rgb): string {
@@ -137,7 +135,7 @@ export function withLightness(hex: string, lightness: number): string {
 
     return toHex(toRgb({
         ...toHsl(rgb),
-        l: clamp(lightness, 0, 1)
+        l: Math.clamp(lightness, 0, 1)
     }));
 }
 

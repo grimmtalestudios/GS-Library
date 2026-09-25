@@ -23,6 +23,10 @@ declare namespace foundry {
     }
 }
 
+interface Math {
+    clamp(value: number, min: number, max: number): number;
+}
+
 interface FoundryApp {
     render(options?: unknown): unknown;
 }

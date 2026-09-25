@@ -1,6 +1,6 @@
-import { colourOr, isDarkGround, lightnessOf, parseColour, pushToContrast, withLightness } from './colour.js';
+import { colourOr, isDarkGround, lightnessOf, pushToContrast, withLightness } from './colour.js';
 import { finishFor } from './finishes.js';
-import { accentPartner, ACCENTS, groundSet, GROUNDS } from './palette.js';
+import { accentPartner, ACCENTS, groundSet } from './palette.js';
 
 export interface Appearance {
     ground?: string;
@@ -74,8 +74,8 @@ function inkLadder(bg: string, isDark: boolean): Ladder {
 }
 
 export function buildTokens(appearance: Appearance = {}): Record<string, string> {
-    const ground = groundSet(appearance.ground ?? GROUNDS.warm.bg);
-    const accent = parseColour(appearance.accent) ? String(appearance.accent) : ACCENTS.blood.value;
+    const ground = groundSet(appearance.ground);
+    const accent = colourOr(appearance.accent, ACCENTS.blood.value);
     const bg = ground.bg;
     const isDark = isDarkGround(bg);
     const ladder = inkLadder(bg, isDark);

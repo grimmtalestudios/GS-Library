@@ -68,7 +68,7 @@ function isBrokenOnCurrentSignature(fn: Listener): boolean {
     }
 }
 
-function getKey(data: unknown, legacyKey: string | undefined, field: string): string | undefined {
+function keyOf(data: unknown, legacyKey: string | undefined, field: string): string | undefined {
     const isDataObject = data !== null && typeof data === 'object' && !Array.isArray(data);
     const key = isDataObject ? (data as Record<string, unknown>)[field] : undefined;
 
@@ -108,7 +108,7 @@ function removeBrokenSfxListeners(): number {
 function bindSfxTriggers(): void {
     for (const { hook, prefix, field } of SFX_HOOKS) {
         Hooks.on(hook, (rolls: unknown, data: unknown, legacyKey?: string) => {
-            const key = getKey(data, legacyKey, field);
+            const key = keyOf(data, legacyKey, field);
 
             // Death saves have no ability and no SFX trigger
             if (key) {

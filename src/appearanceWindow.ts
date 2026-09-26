@@ -1,5 +1,5 @@
 import { hasUserOverride, resolveAppearance, setAppearance, toLook } from './appearance.js';
-import { markSwatches, paintDraft } from './appearancePaint.js';
+import { scoreTokens } from './audit.js';
 import { isDarkGround } from './colour.js';
 import { MODULE_ID } from './constants.js';
 import { finishesFor } from './finishes.js';
@@ -9,17 +9,14 @@ import { createLogger } from './logger.js';
 import { getFooterContext } from './moduleInfo.js';
 import { ACCENTS, GROUNDS } from './palette.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
-import { parseShareCode, toShareCode } from './shareCode.js';
+import { whileSaving } from './saving.js';
+import { isStudioDefault } from './stamp.js';
+import { isSeeThrough } from './surface.js';
 import { createTheme } from './theme.js';
 import { type Appearance, buildTokens, TEXT_KEYS } from './tokens.js';
 
-type Scope = 'world' | 'user' | 'follow';
 type Look = Required<Appearance>;
 type ColourKey = Exclude<keyof Look, 'finish'>;
-
-interface Draft extends Look {
-    scope: Scope;
-}
 
 interface Swatch {
     label: string;
@@ -43,19 +40,19 @@ const log = createLogger(MODULE_ID);
 const theme = createTheme(MODULE_ID);
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-function getInitialScope(): Scope {
-    if (hasUserOverride()) {
-        return 'user';
-    }
-
-    return game.user.isGM ? 'world' : 'follow';
+function getLook(): Look {
+    return toLook(resolveAppearance());
 }
 
-function getInitialDraft(): Draft {
-    return {
-        ...toLook(resolveAppearance()),
-        scope: getInitialScope()
-    };
+async function writeLook(patch: Partial<Look>): Promise<unknown> {
+    if (game.user.isGM && !hasUserOverride()) {
+        return setAppearance(patch, { scope: 'world' });
+    }
+
+    return setAppearance({
+        ...patch,
+        enabled: true
+    });
 }
 
 function swatchGroup(picks: ColourKey, swatches: Swatch[], current: string) {
@@ -64,6 +61,7 @@ function swatchGroup(picks: ColourKey, swatches: Swatch[], current: string) {
         legend: loc(`${picks}.legend`),
         custom: loc(`${picks}.custom`),
         value: current,
+        isCustom: !swatches.some(({ colour }) => colour === current),
         swatches: swatches.map((swatch) => ({
             ...swatch,
             active: swatch.colour === current
@@ -71,39 +69,55 @@ function swatchGroup(picks: ColourKey, swatches: Swatch[], current: string) {
     };
 }
 
-function finishChoices(draft: Draft) {
-    return Object.entries(finishesFor(isDarkGround(draft.ground))).map(([key, finish]) => ({
+function finishChoices(look: Look) {
+    return Object.entries(finishesFor(isDarkGround(look.ground))).map(([key, finish]) => ({
         key,
         label: finish.label,
-        active: key === draft.finish
+        active: key === look.finish
     }));
 }
 
-function textColourRows(draft: Draft) {
-    const tokens = buildTokens(draft);
+function textColourRows(look: Look) {
+    const tokens = buildTokens(look);
 
     return TEXT_KEYS.map((key) => ({
         key,
         label: loc(`text.${key}`),
         colour: tokens[`--gs-${key}`],
-        isSet: Boolean(draft[key])
+        isSet: Boolean(look[key])
     }));
 }
 
-function scopeChoices(scope: Scope) {
-    const offered: Scope[] = game.user.isGM ? ['world', 'user'] : ['follow', 'user'];
+function scoreNote(look: Look, score: ReturnType<typeof scoreTokens>): string {
+    if (score.failing) {
+        return loc('score.weakest', { name: score.weakest });
+    }
 
-    return offered.map((value) => ({
-        value,
-        label: loc(`scope.${value}`),
-        active: value === scope
-    }));
+    return isSeeThrough(look) ? loc('score.seeThrough') : '';
 }
 
-function listPresetChoices(draft: Draft) {
+function scoreSummary(look: Look) {
+    const score = scoreTokens(buildTokens(look));
+
+    return {
+        value: score.score,
+        verdict: score.verdict,
+        label: loc(`score.${score.verdict}`),
+        note: scoreNote(look, score)
+    };
+}
+
+function isSameLook(a: Look, b: Look): boolean {
+    return Object.keys(a).every((key) => a[key as keyof Look] === b[key as keyof Look]);
+}
+
+function listPresetChoices(look: Look) {
+    const finishes = finishesFor(true);
+
     return listPresets().map((preset) => ({
         ...preset,
-        active: preset.ground === draft.ground && preset.accent === draft.accent
+        finishLabel: finishes[preset.finish].label,
+        active: isSameLook(toLook(preset), look)
     }));
 }
 
@@ -111,50 +125,9 @@ function getPresetNameField(root: HTMLElement): HTMLInputElement | null {
     return root.querySelector<HTMLInputElement>('[name="presetName"]');
 }
 
-function getShareInput(root: HTMLElement): HTMLInputElement | null {
-    return root.querySelector<HTMLInputElement>('[name="shareInput"]');
-}
-
-function bindEnterKey(field: HTMLInputElement | null, action: () => void): void {
-    field?.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter') {
-            return;
-        }
-
-        // Stop Enter submitting the form (it closes the window)
-        event.preventDefault();
-        action();
-    });
-}
-
-function markSaving(form: HTMLFormElement): void {
-    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-
-    button?.toggleAttribute('disabled', true);
-    button?.setAttribute('aria-busy', 'true');
-    button?.querySelector('i')?.setAttribute('class', 'fa-solid fa-spinner gs-spin');
-}
-
-async function saveDraft({ scope, ...look }: Draft): Promise<void> {
-    if (scope === 'world') {
-        await setAppearance(look, { scope: 'world' });
-
-        // Turn the GM's override off so the new world appearance shows
-        await setAppearance({ enabled: false });
-
-        return;
-    }
-
-    await setAppearance(scope === 'user' ? {
-        ...look,
-        enabled: true
-    } : { enabled: false });
-}
-
 class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: WINDOW_ID,
-        tag: 'form',
         classes: ['gs-shared-base', 'gs-library-appearance-window'],
         window: {
             title: 'GRIMMTALE.settings.title',
@@ -162,54 +135,46 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             resizable: false
         },
         position: {
-            width: 660, // room for six accent swatches beside the preview
+            width: 380, // room for the five finishes on one row
             height: 'auto'
-        },
-        form: {
-            handler: AppearanceWindow.onSubmit,
-            submitOnChange: false,
-            closeOnSubmit: true
         },
         actions: {
             pickColour: AppearanceWindow.onPickColour,
             pickFinish: AppearanceWindow.onPickFinish,
-            pickScope: AppearanceWindow.onPickScope,
             clearTextColour: AppearanceWindow.onClearTextColour,
             applyPreset: AppearanceWindow.onApplyPreset,
             savePreset: AppearanceWindow.onSavePreset,
             deletePreset: AppearanceWindow.onDeletePreset,
-            copyShareCode: AppearanceWindow.onCopyShareCode,
-            applyShareCode: AppearanceWindow.onApplyShareCode,
-            reset: AppearanceWindow.onReset,
-            cancel: AppearanceWindow.onCancel
+            reset: AppearanceWindow.onReset
         }
     };
 
     static PARTS = {
         body: {
             template: TEMPLATE,
-            scrollable: ['.gs-library-appearance-column:first-child', '.gs-library-appearance-column:last-child']
+            scrollable: ['.gs-scroll']
         }
     };
 
     declare element: HTMLElement;
 
-    draft = getInitialDraft();
-
     async _prepareContext(options: unknown) {
         const context = await super._prepareContext(options);
+        const look = getLook();
 
         return {
             ...context,
             ...getFooterContext(MODULE_ID),
             swatchGroups: [
-                swatchGroup('ground', GROUND_SWATCHES, this.draft.ground),
-                swatchGroup('accent', ACCENT_SWATCHES, this.draft.accent)
+                swatchGroup('ground', GROUND_SWATCHES, look.ground),
+                swatchGroup('accent', ACCENT_SWATCHES, look.accent)
             ],
-            finishes: finishChoices(this.draft),
-            textColours: textColourRows(this.draft),
-            scopes: scopeChoices(this.draft.scope),
-            presets: listPresetChoices(this.draft)
+            finishes: finishChoices(look),
+            textColours: textColourRows(look),
+            score: scoreSummary(look),
+            ownLook: hasUserOverride(),
+            presets: listPresetChoices(look),
+            isDefault: isStudioDefault(look)
         };
     }
 
@@ -220,18 +185,37 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
 
     _onRender(context: unknown, options: unknown): void {
         super._onRender(context, options);
-        paintDraft(this.element, this.draft);
 
         for (const well of this.element.querySelectorAll<HTMLInputElement>('input[type="color"]')) {
-            well.addEventListener('input', () => this.onWellInput(well));
-            well.addEventListener('change', () => void this.render());
+            well.addEventListener('change', () => void this.save(well, () => writeLook({
+                [well.dataset.picks as ColourKey]: well.value
+            })));
         }
 
-        bindEnterKey(getPresetNameField(this.element), () => void this.saveDraftAsPreset());
-        bindEnterKey(getShareInput(this.element), () => this.applyShareCode());
+        const ownLook = this.element.querySelector<HTMLInputElement>('[name="ownLook"]');
+
+        ownLook?.addEventListener('change', () => void this.save(ownLook, () => setAppearance({
+            enabled: ownLook.checked
+        })));
+
+        getPresetNameField(this.element)?.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                void this.saveLookAsPreset(event.currentTarget as HTMLElement);
+            }
+        });
     }
 
-    async saveDraftAsPreset(): Promise<void> {
+    async save(control: HTMLElement, write: () => Promise<unknown>, failure = 'saveFailed'): Promise<void> {
+        try {
+            await whileSaving(control, write);
+        } catch (err) {
+            log.fail(loc(failure), err);
+        }
+
+        void this.render();
+    }
+
+    async saveLookAsPreset(control: HTMLElement): Promise<void> {
         const field = getPresetNameField(this.element);
         const name = field?.value.trim();
 
@@ -241,76 +225,21 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             return;
         }
 
-        await this.writePresets(() => savePreset(name, this.draft));
-    }
-
-    async writePresets(write: () => Promise<unknown>): Promise<void> {
-        try {
-            await write();
-        } catch (err) {
-            log.fail(loc('presetFailed'), err);
-
-            return;
-        }
-
-        void this.render();
-    }
-
-    applyShareCode(): void {
-        const field = getShareInput(this.element);
-        const code = field?.value ?? '';
-        const look = parseShareCode(code);
-
-        if (!look) {
-            if (code.trim()) {
-                ui.notifications?.warn(loc('share.notALook'));
-            }
-
-            field?.focus();
-
-            return;
-        }
-
-        this.draft = {
-            ...look,
-            scope: this.draft.scope
-        };
-        void this.render();
-    }
-
-    onWellInput(well: HTMLInputElement): void {
-        const picks = well.dataset.picks as ColourKey;
-
-        this.draft[picks] = well.value;
-
-        // Re-rendering mid-drag closes the colour picker
-        paintDraft(this.element, this.draft);
-        markSwatches(this.element, picks, well.value);
+        await this.save(control, () => savePreset(name, getLook()), 'presetFailed');
     }
 
     static onPickColour(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
         const { picks, colour } = target.dataset;
 
-        if (!colour) {
-            return;
-        }
-
-        this.draft[picks as ColourKey] = colour;
-        void this.render();
+        void this.save(target, () => writeLook({ [picks as ColourKey]: colour }));
     }
 
     static onPickFinish(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
-        this.draft.finish = target.dataset.finish ?? this.draft.finish;
-        void this.render();
-    }
-
-    static onPickScope(this: AppearanceWindow, _event: PointerEvent, target: HTMLInputElement): void {
-        this.draft.scope = target.value as Scope;
+        void this.save(target, () => writeLook({ finish: target.dataset.finish }));
     }
 
     static onClearTextColour(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
-        this.draft[target.dataset.text as ColourKey] = '';
-        void this.render();
+        void this.save(target, () => writeLook({ [target.dataset.text as ColourKey]: '' }));
     }
 
     static onApplyPreset(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
@@ -320,48 +249,19 @@ class AppearanceWindow extends HandlebarsApplicationMixin(ApplicationV2) {
             return;
         }
 
-        this.draft.ground = preset.ground;
-        this.draft.accent = preset.accent;
-        void this.render();
+        void this.save(target, () => writeLook(toLook(preset)));
     }
 
-    static onSavePreset(this: AppearanceWindow): void {
-        void this.saveDraftAsPreset();
+    static onSavePreset(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
+        void this.saveLookAsPreset(target);
     }
 
     static onDeletePreset(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
-        void this.writePresets(() => deletePreset(target.dataset.preset ?? ''));
+        void this.save(target, () => deletePreset(target.dataset.preset ?? ''), 'presetFailed');
     }
 
-    static async onCopyShareCode(this: AppearanceWindow): Promise<void> {
-        await game.clipboard.copyPlainText(toShareCode(this.draft));
-        ui.notifications?.info(loc('share.copied'));
-    }
-
-    static onApplyShareCode(this: AppearanceWindow): void {
-        this.applyShareCode();
-    }
-
-    static onReset(this: AppearanceWindow): void {
-        this.draft = {
-            ...toLook({}),
-            scope: this.draft.scope
-        };
-        void this.render();
-    }
-
-    static onCancel(this: AppearanceWindow): void {
-        void this.close();
-    }
-
-    static async onSubmit(this: AppearanceWindow, _event: SubmitEvent, form: HTMLFormElement): Promise<void> {
-        markSaving(form);
-
-        try {
-            await saveDraft(this.draft);
-        } catch (err) {
-            log.fail(loc('saveFailed'), err);
-        }
+    static onReset(this: AppearanceWindow, _event: PointerEvent, target: HTMLElement): void {
+        void this.save(target, () => writeLook(toLook({})));
     }
 }
 

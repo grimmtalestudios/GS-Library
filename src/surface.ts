@@ -8,7 +8,7 @@ interface Surface {
     header: string;
 }
 
-export function toTranslucent(hex: string, alpha: number): string {
+function toTranslucent(hex: string, alpha: number): string {
     const rgb = parseColour(hex);
 
     return rgb ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})` : hex;

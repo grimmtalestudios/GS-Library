@@ -13,7 +13,7 @@ interface StampOptions {
 
 const STAMPED = '[data-gs-appearance], [data-gs-themes], [data-gs-module], [data-gs-overlay]';
 
-function isStudioDefault(appearance: Required<Appearance>): boolean {
+export function isStudioDefault(appearance: Required<Appearance>): boolean {
     return appearance.ground === GROUNDS.warm.bg
         && appearance.accent === ACCENTS.blood.value
         && appearance.finish === DEFAULT_FINISH

@@ -4,7 +4,7 @@ import { ACCENTS, GROUNDS } from './palette.js';
 import { buildSurface, isSeeThrough } from './surface.js';
 import { buildTokens, TEXT_KEYS } from './tokens.js';
 const STAMPED = '[data-gs-appearance], [data-gs-themes], [data-gs-module], [data-gs-overlay]';
-function isStudioDefault(appearance) {
+export function isStudioDefault(appearance) {
     return appearance.ground === GROUNDS.warm.bg
         && appearance.accent === ACCENTS.blood.value
         && appearance.finish === DEFAULT_FINISH

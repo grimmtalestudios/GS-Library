@@ -1,168 +1,102 @@
 <div class="gs-shell gs-library-appearance">
-  <div class="gs-library-appearance-columns">
-    <section class="gs-library-appearance-column gs-scroll">
-      {{#each swatchGroups}}
-        <fieldset class="gs-library-appearance-field">
-          <legend class="gs-eyebrow">{{legend}}</legend>
-          <div class="gs-library-appearance-swatches" role="group">
-            {{#each swatches}}
-              <button type="button" class="gs-library-appearance-swatch" data-action="pickColour"
-                      data-picks="{{../picks}}" data-colour="{{colour}}" aria-pressed="{{active}}">
-                <span class="gs-library-appearance-chip" style="background: {{colour}}"></span>
-                <span>{{label}}</span>
-              </button>
-            {{/each}}
-          </div>
-          <label class="gs-library-appearance-custom">
-            <input type="color" name="{{picks}}" data-picks="{{picks}}" value="{{value}}" />
-            <span>{{custom}}</span>
-          </label>
-        </fieldset>
-      {{/each}}
-      <fieldset class="gs-library-appearance-field">
-        <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.finish.legend"}}</legend>
-        <div class="gs-library-appearance-swatches" role="group">
-          {{#each finishes}}
-            <button type="button" class="gs-library-appearance-swatch" data-action="pickFinish"
-                    data-finish="{{key}}" aria-pressed="{{active}}">
-              <span class="gs-library-appearance-chequer">
-                <span class="gs-library-appearance-chip" data-finish-sample="{{key}}"></span>
-              </span>
-              <span>{{label}}</span>
-            </button>
+  <div class="gs-scroll gs-library-appearance-body">
+    {{#each swatchGroups}}
+      <section class="gs-library-appearance-field">
+        <span class="gs-library-appearance-label">{{legend}}</span>
+        <div class="gs-library-appearance-swatches" role="group" aria-label="{{legend}}">
+          {{#each swatches}}
+            <button type="button" class="gs-library-appearance-swatch" data-action="pickColour"
+                    data-picks="{{../picks}}" data-colour="{{colour}}" aria-pressed="{{active}}"
+                    data-tooltip="{{label}}" aria-label="{{label}}" style="--swatch: {{colour}}"></button>
           {{/each}}
-        </div>
-      </fieldset>
-      <fieldset class="gs-library-appearance-field">
-        <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.text.legend"}}</legend>
-        {{#each textColours}}
-          <div class="gs-library-appearance-text{{#if isSet}} is-set{{/if}}">
-            <label class="gs-library-appearance-custom">
-              <input type="color" name="{{key}}" data-picks="{{key}}" value="{{colour}}" />
-              <span>{{label}}</span>
-            </label>
-            {{#if isSet}}
-              <button type="button" class="gs-btn ghost" data-action="clearTextColour" data-text="{{key}}">
-                <span>{{localize "GRIMMTALE.settings.text.auto"}}</span>
-              </button>
-            {{else}}
-              <span class="gs-library-appearance-text-follows">{{localize "GRIMMTALE.settings.text.following"}}</span>
-            {{/if}}
-          </div>
-        {{/each}}
-      </fieldset>
-      <fieldset class="gs-library-appearance-field">
-        <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.scope.legend"}}</legend>
-        {{#each scopes}}
-          <label class="gs-row">
-            <input type="radio" name="scope" value="{{value}}" data-action="pickScope" {{checked active}} />
-            <span class="gs-row-label">{{label}}</span>
+          <label class="gs-library-appearance-custom{{#if isCustom}} is-active{{/if}}" style="--swatch: {{value}}"
+                 data-tooltip="{{custom}}">
+            <input type="color" data-picks="{{picks}}" value="{{value}}" aria-label="{{custom}}" />
+            <i class="fa-solid fa-plus" inert></i>
           </label>
+        </div>
+      </section>
+    {{/each}}
+    <section class="gs-library-appearance-field">
+      <span class="gs-library-appearance-label">{{localize "GRIMMTALE.settings.finish.legend"}}</span>
+      <div class="gs-library-appearance-finishes" role="group"
+           aria-label="{{localize 'GRIMMTALE.settings.finish.legend'}}">
+        {{#each finishes}}
+          <button type="button" class="gs-library-appearance-finish" data-action="pickFinish"
+                  data-finish="{{key}}" aria-pressed="{{active}}">{{label}}</button>
         {{/each}}
-      </fieldset>
-    </section>
-    <section class="gs-library-appearance-column gs-scroll">
-      <div class="gs-library-appearance-chequer gs-library-appearance-preview" data-preview inert>
-        <div class="gs-library-appearance-preview-header" data-preview-header>
-          <i class="fa-solid fa-compass-drafting" inert></i>
-          <span>{{localize "GRIMMTALE.settings.preview.window"}}</span>
-        </div>
-        <div class="gs-library-appearance-preview-body" data-preview-body>
-          <div class="gs-library-appearance-preview-row is-selected">
-            <span>{{localize "GRIMMTALE.settings.preview.selected"}}</span>
-            <span class="gs-hint">{{localize "GRIMMTALE.settings.preview.muted"}}</span>
-          </div>
-          <div class="gs-library-appearance-preview-row">
-            <span>{{localize "GRIMMTALE.settings.preview.row"}}</span>
-            <span class="gs-library-appearance-preview-faint">{{localize "GRIMMTALE.settings.preview.faint"}}</span>
-          </div>
-          <div class="gs-library-appearance-preview-controls">
-            <span class="gs-btn">{{localize "GRIMMTALE.settings.preview.button"}}</span>
-            <span class="gs-btn danger">{{localize "GRIMMTALE.settings.preview.danger"}}</span>
-            <span class="gs-chip is-off">{{localize "GRIMMTALE.settings.preview.chip"}}</span>
-          </div>
-        </div>
       </div>
-      <div class="gs-panel gs-library-appearance-score" data-score>
-        <span class="gs-figure" data-score-value></span>
-        <span class="gs-library-appearance-score-text">
-          <span class="gs-library-appearance-score-verdict" data-score-verdict></span>
-          <span class="gs-eyebrow">{{localize "GRIMMTALE.settings.score.label"}}</span>
+    </section>
+    <section class="gs-library-appearance-field">
+      <div class="gs-library-appearance-head">
+        <span class="gs-library-appearance-label">{{localize "GRIMMTALE.settings.text.legend"}}</span>
+        <span class="gs-library-appearance-score" data-verdict="{{score.verdict}}"
+              data-tooltip="{{localize 'GRIMMTALE.settings.score.label'}}">
+          <span class="gs-figure">{{score.value}}</span>
+          <span>{{score.label}}</span>
         </span>
       </div>
-      <p class="gs-hint gs-library-appearance-score-note" data-score-note></p>
-      <fieldset class="gs-library-appearance-field">
-        <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.presets.legend"}}</legend>
-        {{#if presets.length}}
-          <ul class="gs-library-appearance-presets">
-            {{#each presets}}
-              <li class="gs-library-appearance-preset">
-                <button type="button" class="gs-library-appearance-preset-apply" data-action="applyPreset"
-                        data-preset="{{id}}" aria-pressed="{{active}}">
-                  <span class="gs-library-appearance-preset-chips">
-                    <span class="gs-library-appearance-preset-chip" style="background: {{ground}}"></span>
-                    <span class="gs-library-appearance-preset-chip" style="background: {{accent}}"></span>
-                  </span>
-                  <span>{{name}}</span>
-                </button>
-                <button type="button" class="gs-icon-btn dense" data-action="deletePreset" data-preset="{{id}}"
-                        data-tooltip="{{localize 'GRIMMTALE.settings.presets.forget'}}"
-                        aria-label="{{localize 'GRIMMTALE.settings.presets.forget'}} {{name}}">
-                  <i class="fa-solid fa-xmark" inert></i>
-                </button>
-              </li>
-            {{/each}}
-          </ul>
-        {{else}}
-          <p class="gs-hint">{{localize "GRIMMTALE.settings.presets.empty"}}</p>
-        {{/if}}
-        <div class="gs-library-appearance-input-row">
-          <input type="text" name="presetName" maxlength="40" autocomplete="off"
-                 placeholder="{{localize 'GRIMMTALE.settings.presets.placeholder'}}"
-                 aria-label="{{localize 'GRIMMTALE.settings.presets.placeholder'}}" />
-          <button type="button" class="gs-btn ghost" data-action="savePreset">
-            <span>{{localize "GRIMMTALE.settings.presets.save"}}</span>
-          </button>
-        </div>
-      </fieldset>
-      <fieldset class="gs-library-appearance-field">
-        <legend class="gs-eyebrow">{{localize "GRIMMTALE.settings.share.legend"}}</legend>
-        <div class="gs-library-appearance-share">
-          <label class="gs-eyebrow" for="{{partId}}-share-code">{{localize "GRIMMTALE.settings.share.give"}}</label>
-          <div class="gs-library-appearance-input-row">
-            <input type="text" id="{{partId}}-share-code" data-share-code readonly />
-            <button type="button" class="gs-btn ghost" data-action="copyShareCode">
-              <span>{{localize "GRIMMTALE.settings.share.copy"}}</span>
+      {{#each textColours}}
+        <div class="gs-library-appearance-text">
+          <span>{{label}}</span>
+          <input type="color" data-picks="{{key}}" value="{{colour}}" aria-label="{{label}}" />
+          {{#if isSet}}
+            <button type="button" class="gs-icon-btn dense" data-action="clearTextColour" data-text="{{key}}"
+                    data-tooltip="{{localize 'GRIMMTALE.settings.text.follow'}}"
+                    aria-label="{{localize 'GRIMMTALE.settings.text.follow'}}">
+              <i class="fa-solid fa-rotate-left" inert></i>
             </button>
-          </div>
+          {{/if}}
         </div>
-        <div class="gs-library-appearance-share">
-          <label class="gs-eyebrow" for="{{partId}}-share-input">{{localize "GRIMMTALE.settings.share.take"}}</label>
-          <div class="gs-library-appearance-input-row">
-            <input type="text" id="{{partId}}-share-input" name="shareInput" autocomplete="off"
-                   placeholder="{{localize 'GRIMMTALE.settings.share.placeholder'}}" />
-            <button type="button" class="gs-btn ghost" data-action="applyShareCode">
-              <span>{{localize "GRIMMTALE.settings.share.apply"}}</span>
-            </button>
-          </div>
-        </div>
-        <p class="gs-hint">{{localize "GRIMMTALE.settings.share.note"}}</p>
-      </fieldset>
+      {{/each}}
+      {{#if score.note}}
+        <p class="gs-hint">{{score.note}}</p>
+      {{/if}}
     </section>
-  </div>
-  <div class="gs-library-appearance-buttons">
-    <button type="button" class="gs-btn ghost" data-action="reset">
-      <i class="fa-solid fa-rotate-left" inert></i>
-      <span>{{localize "GRIMMTALE.settings.reset"}}</span>
-    </button>
-    <button type="button" class="gs-btn ghost" data-action="cancel">
-      <i class="fa-solid fa-xmark" inert></i>
-      <span>{{localize "GRIMMTALE.settings.cancel"}}</span>
-    </button>
-    <button type="submit" class="gs-btn">
-      <i class="fa-solid fa-floppy-disk" inert></i>
-      <span>{{localize "GRIMMTALE.settings.save"}}</span>
-    </button>
+    <section class="gs-library-appearance-field">
+      <div class="gs-library-appearance-head">
+        <span class="gs-library-appearance-label">{{localize "GRIMMTALE.settings.presets.legend"}}</span>
+        <label class="gs-library-appearance-own">
+          <input type="checkbox" name="ownLook" {{checked ownLook}} />
+          <span>{{localize "GRIMMTALE.settings.ownLook"}}</span>
+        </label>
+      </div>
+      <div class="gs-library-appearance-save">
+        <input type="text" name="presetName" maxlength="40" autocomplete="off"
+               placeholder="{{localize 'GRIMMTALE.settings.presets.placeholder'}}"
+               aria-label="{{localize 'GRIMMTALE.settings.presets.placeholder'}}" />
+        <button type="button" class="gs-btn ghost" data-action="savePreset">
+          <i class="fa-solid fa-floppy-disk" inert></i>
+          <span>{{localize "GRIMMTALE.settings.save"}}</span>
+        </button>
+      </div>
+      {{#if presets.length}}
+        <ul class="gs-library-appearance-presets">
+          {{#each presets}}
+            <li class="gs-library-appearance-preset">
+              <button type="button" class="gs-library-appearance-preset-apply" data-action="applyPreset"
+                      data-preset="{{id}}" aria-pressed="{{active}}">
+                <span class="gs-library-appearance-preset-chip" style="background: {{ground}}"></span>
+                <span class="gs-library-appearance-preset-chip" style="background: {{accent}}"></span>
+                <span class="gs-library-appearance-preset-name">{{name}}</span>
+                <span class="gs-library-appearance-preset-finish">{{finishLabel}}</span>
+              </button>
+              <button type="button" class="gs-icon-btn dense" data-action="deletePreset" data-preset="{{id}}"
+                      data-tooltip="{{localize 'GRIMMTALE.settings.presets.forget'}}"
+                      aria-label="{{localize 'GRIMMTALE.settings.presets.forget'}} {{name}}">
+                <i class="fa-solid fa-xmark" inert></i>
+              </button>
+            </li>
+          {{/each}}
+        </ul>
+      {{/if}}
+    </section>
+    {{#unless isDefault}}
+      <button type="button" class="gs-btn ghost" data-action="reset">
+        <i class="fa-solid fa-rotate-left" inert></i>
+        <span>{{localize "GRIMMTALE.settings.reset"}}</span>
+      </button>
+    {{/unless}}
   </div>
   <footer class="gs-footer">
     {{#if website}}

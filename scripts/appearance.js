@@ -9,6 +9,7 @@ export const THEMES = Object.freeze({
     base: 'base'
 });
 const FOLLOW = 'follow';
+export const PALETTE_MAX = 10;
 function isTheme(value) {
     return value === THEMES.dark || value === THEMES.base;
 }
@@ -21,21 +22,36 @@ function themesOf(value) {
     const stored = value && typeof value === 'object' ? Object.entries(value) : [];
     return Object.fromEntries(stored.filter(([, choice]) => isTheme(choice)));
 }
+function coloursOf(value, active) {
+    const stored = Array.isArray(value) ? value.map((colour) => colourOr(colour, '')).filter(Boolean) : [];
+    const kept = stored.slice(0, PALETTE_MAX);
+    return kept.includes(active) ? kept : [active, ...kept];
+}
+function paletteOf(value, ground, accent) {
+    const stored = (value && typeof value === 'object' ? value : {});
+    return {
+        ground: coloursOf(stored.ground, ground),
+        accent: coloursOf(stored.accent, accent)
+    };
+}
 export function toAppearance(raw) {
     const value = (raw && typeof raw === 'object' ? raw : {});
+    const ground = groundOf(value.ground);
+    const accent = colourOr(value.accent, ACCENTS.blood.value);
     return {
-        ground: groundOf(value.ground),
-        accent: colourOr(value.accent, ACCENTS.blood.value),
+        ground,
+        accent,
         finish: isFinish(value.finish) ? String(value.finish) : DEFAULT_FINISH,
         ink: colourOr(value.ink, ''),
         muted: colourOr(value.muted, ''),
         faint: colourOr(value.faint, ''),
         title: colourOr(value.title, ''),
-        modules: themesOf(value.modules)
+        modules: themesOf(value.modules),
+        palette: paletteOf(value.palette, ground, accent)
     };
 }
 export function toLook(raw) {
-    const { modules: _modules, ...look } = toAppearance(raw);
+    const { modules: _modules, palette: _palette, ...look } = toAppearance(raw);
     return look;
 }
 function getWorldAppearance() {

@@ -5,11 +5,17 @@ import { ACCENTS, GROUNDS } from './palette.js';
 import { readSetting, writeSetting } from './settings.js';
 import { type Appearance, buildTokens } from './tokens.js';
 
-interface ResolvedAppearance extends Required<Appearance> {
-    modules: Record<string, string>;
+interface Palette {
+    ground: string[];
+    accent: string[];
 }
 
-interface AppearancePatch extends Partial<ResolvedAppearance> {
+export interface ResolvedAppearance extends Required<Appearance> {
+    modules: Record<string, string>;
+    palette: Palette;
+}
+
+export interface AppearancePatch extends Partial<ResolvedAppearance> {
     enabled?: boolean;
 }
 
@@ -23,6 +29,8 @@ export const THEMES = Object.freeze({
 });
 
 const FOLLOW = 'follow';
+
+export const PALETTE_MAX = 10;
 
 function isTheme(value: unknown): value is string {
     return value === THEMES.dark || value === THEMES.base;
@@ -42,23 +50,42 @@ function themesOf(value: unknown): Record<string, string> {
     return Object.fromEntries(stored.filter(([, choice]) => isTheme(choice)));
 }
 
-export function toAppearance(raw: unknown): ResolvedAppearance {
-    const value = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+function coloursOf(value: unknown, active: string): string[] {
+    const stored = Array.isArray(value) ? value.map((colour) => colourOr(colour, '')).filter(Boolean) : [];
+    const kept = stored.slice(0, PALETTE_MAX);
+
+    return kept.includes(active) ? kept : [active, ...kept];
+}
+
+function paletteOf(value: unknown, ground: string, accent: string): Palette {
+    const stored = (value && typeof value === 'object' ? value : {}) as Record<string, unknown>;
 
     return {
-        ground: groundOf(value.ground),
-        accent: colourOr(value.accent, ACCENTS.blood.value),
+        ground: coloursOf(stored.ground, ground),
+        accent: coloursOf(stored.accent, accent)
+    };
+}
+
+export function toAppearance(raw: unknown): ResolvedAppearance {
+    const value = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+    const ground = groundOf(value.ground);
+    const accent = colourOr(value.accent, ACCENTS.blood.value);
+
+    return {
+        ground,
+        accent,
         finish: isFinish(value.finish) ? String(value.finish) : DEFAULT_FINISH,
         ink: colourOr(value.ink, ''),
         muted: colourOr(value.muted, ''),
         faint: colourOr(value.faint, ''),
         title: colourOr(value.title, ''),
-        modules: themesOf(value.modules)
+        modules: themesOf(value.modules),
+        palette: paletteOf(value.palette, ground, accent)
     };
 }
 
 export function toLook(raw: unknown): Required<Appearance> {
-    const { modules: _modules, ...look } = toAppearance(raw);
+    const { modules: _modules, palette: _palette, ...look } = toAppearance(raw);
 
     return look;
 }

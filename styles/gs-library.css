@@ -68,71 +68,101 @@
   gap: var(--gs-space-2);
 }
 
-.gs-library-theme-swatch,
-.gs-library-theme-custom {
-  flex: 0 0 auto;
+.gs-library-theme-slot {
+  position: relative;
+  display: inline-flex;
+}
+
+.gs-library-theme-editor :is(.gs-library-theme-swatch, .gs-library-theme-text > input) {
   width: 24px;
   height: 24px;
+  padding: 0;
+  border: 1px solid var(--gs-line-strong);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color var(--gs-hover-ease);
+}
+
+.gs-library-theme-editor :is(.gs-library-theme-swatch, .gs-library-theme-text > input):hover {
+  border-color: var(--gs-accent);
+}
+
+:is(.gs-library-theme-swatch, .gs-library-theme-text > input)::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+:is(.gs-library-theme-swatch, .gs-library-theme-text > input)::-webkit-color-swatch {
+  border: 0;
+  border-radius: var(--gs-radius);
+}
+
+.gs-library-theme-editor .gs-library-theme-slot.is-active > .gs-library-theme-swatch {
+  outline: 2px solid var(--gs-ink);
+  outline-offset: 2px;
+}
+
+.gs-library-theme-editor[data-input="keyboard"] input[type="color"]:focus-visible {
+  outline: 2px solid var(--gs-accent);
+  outline-offset: 2px;
+}
+
+.gs-library-theme-delete {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
   min-height: 0;
   margin: 0;
   padding: 0;
   border: 1px solid var(--gs-line-strong);
   border-radius: var(--gs-radius);
-  background: var(--swatch);
+  background: var(--gs-bg);
+  color: var(--gs-muted);
+  font-size: var(--gs-text-xs);
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--gs-hover-ease),
+    color var(--gs-hover-ease) !important;
+}
+
+.gs-library-theme-slot:hover > .gs-library-theme-delete,
+.gs-library-theme-delete:focus-visible {
+  opacity: 1;
+}
+
+.gs-library-theme-delete:hover {
+  color: var(--gs-bad);
+}
+
+.gs-library-theme-add {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px dashed var(--gs-line-strong);
+  border-radius: var(--gs-radius);
+  background: transparent;
+  color: var(--gs-muted);
+  font-size: var(--gs-text-xs);
   cursor: pointer;
   transition:
     border-color var(--gs-hover-ease),
     color var(--gs-hover-ease) !important;
 }
 
-.gs-library-theme-swatch:hover,
-.gs-library-theme-custom:hover {
+.gs-library-theme-add:hover {
   border-color: var(--gs-accent);
-}
-
-.gs-library-theme-editor :is(.gs-library-theme-swatch[aria-pressed="true"], .gs-library-theme-custom.is-active) {
-  outline: 2px solid var(--gs-ink);
-  outline-offset: 2px;
-}
-
-.gs-library-theme-custom {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  border-style: dashed;
-  background: transparent;
-  color: var(--gs-muted);
-}
-
-.gs-library-theme-custom:hover {
   color: var(--gs-ink);
-}
-
-.gs-library-theme-custom.is-active {
-  border-style: solid;
-  background: var(--swatch);
-}
-
-.gs-library-theme-custom > i {
-  font-size: var(--gs-text-xs);
-}
-
-.gs-library-theme-custom.is-active > i {
-  visibility: hidden;
-}
-
-.gs-library-theme-custom > input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.gs-library-theme-editor[data-input="keyboard"] :is(.gs-library-theme-custom:has(> input:focus-visible), input[type="color"]:focus-visible) {
-  outline: 2px solid var(--gs-accent);
-  outline-offset: 2px;
 }
 
 .gs-library-theme-finishes {
@@ -183,23 +213,6 @@
   font-size: var(--gs-text-sm);
 }
 
-.gs-library-theme-editor .gs-library-theme-text > input {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 1px solid var(--gs-line-strong);
-  background: transparent;
-  cursor: pointer;
-}
-
-.gs-library-theme-text > input::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.gs-library-theme-text > input::-webkit-color-swatch {
-  border: 0;
-  border-radius: var(--gs-radius);
-}
 
 .gs-library-theme-score {
   display: inline-flex;

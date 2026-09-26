@@ -1,4 +1,12 @@
-import { hasUserOverride, resolveAppearance, setAppearance, toLook } from './appearance.js';
+import {
+    type AppearancePatch,
+    hasUserOverride,
+    PALETTE_MAX,
+    type ResolvedAppearance,
+    resolveAppearance,
+    setAppearance,
+    toLook
+} from './appearance.js';
 import { scoreTokens } from './audit.js';
 import { isDarkGround } from './colour.js';
 import { MODULE_ID } from './constants.js';
@@ -7,7 +15,6 @@ import { bindFrame } from './frame.js';
 import { createLocalizer } from './i18n.js';
 import { createLogger } from './logger.js';
 import { getFooterContext } from './moduleInfo.js';
-import { ACCENTS, GROUNDS } from './palette.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
 import { whileSaving } from './saving.js';
 import { isStudioDefault } from './stamp.js';
@@ -17,23 +24,11 @@ import { type Appearance, buildTokens, TEXT_KEYS } from './tokens.js';
 
 type Theme = Required<Appearance>;
 type ColourKey = Exclude<keyof Theme, 'finish'>;
-
-interface Swatch {
-    label: string;
-    colour: string;
-}
+type PaletteKey = keyof ResolvedAppearance['palette'];
 
 const WINDOW_ID = `${MODULE_ID}-theme`;
 const ICON = 'fa-solid fa-palette';
 const TEMPLATE = `modules/${MODULE_ID}/templates/theme-editor.hbs`;
-const BASE_SWATCHES: Swatch[] = Object.values(GROUNDS).map(({ label, bg }) => ({
-    label,
-    colour: bg
-}));
-const ACCENT_SWATCHES: Swatch[] = Object.values(ACCENTS).map(({ label, value }) => ({
-    label,
-    colour: value
-}));
 
 const loc = createLocalizer('GRIMMTALE.theme');
 const log = createLogger(MODULE_ID);
@@ -44,7 +39,7 @@ function getTheme(): Theme {
     return toLook(resolveAppearance());
 }
 
-async function writeTheme(patch: Partial<Theme>): Promise<unknown> {
+async function writeTheme(patch: AppearancePatch): Promise<unknown> {
     if (game.user.isGM && !hasUserOverride()) {
         return setAppearance(patch, { scope: 'world' });
     }
@@ -55,16 +50,49 @@ async function writeTheme(patch: Partial<Theme>): Promise<unknown> {
     });
 }
 
-function swatchGroup(picks: ColourKey, labels: string, swatches: Swatch[], current: string) {
+async function writePalette(kind: PaletteKey, colours: string[], active: string): Promise<unknown> {
+    return writeTheme({
+        [kind]: active,
+        palette: {
+            ...resolveAppearance().palette,
+            [kind]: colours
+        }
+    });
+}
+
+async function changeSwatch(kind: PaletteKey, index: number, colour: string): Promise<unknown> {
+    const colours = resolveAppearance().palette[kind].map((current, at) => (at === index ? colour : current));
+
+    return writePalette(kind, colours, colour);
+}
+
+async function addSwatch(kind: PaletteKey): Promise<unknown> {
+    const appearance = resolveAppearance();
+
+    return writePalette(kind, [...appearance.palette[kind], appearance[kind]], appearance[kind]);
+}
+
+async function deleteSwatch(kind: PaletteKey, index: number): Promise<unknown> {
+    const appearance = resolveAppearance();
+    const colours = appearance.palette[kind].filter((_colour, at) => at !== index);
+    const active = colours.includes(appearance[kind]) ? appearance[kind] : colours[0];
+
+    return writePalette(kind, colours, active);
+}
+
+function paletteGroup(kind: PaletteKey, labels: string, appearance: ResolvedAppearance) {
+    const colours = appearance.palette[kind];
+
     return {
-        picks,
+        kind,
         legend: loc(`${labels}.legend`),
-        custom: loc(`${labels}.custom`),
-        value: current,
-        isCustom: !swatches.some(({ colour }) => colour === current),
-        swatches: swatches.map((swatch) => ({
-            ...swatch,
-            active: swatch.colour === current
+        add: loc(`${labels}.add`),
+        canAdd: colours.length < PALETTE_MAX,
+        canDelete: colours.length > 1,
+        swatches: colours.map((colour, index) => ({
+            colour,
+            index,
+            active: colour === appearance[kind]
         }))
     };
 }
@@ -139,7 +167,8 @@ class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             height: 'auto'
         },
         actions: {
-            pickColour: ThemeEditor.onPickColour,
+            addSwatch: ThemeEditor.onAddSwatch,
+            deleteSwatch: ThemeEditor.onDeleteSwatch,
             pickFinish: ThemeEditor.onPickFinish,
             clearTextColour: ThemeEditor.onClearTextColour,
             loadTheme: ThemeEditor.onLoadTheme,
@@ -160,14 +189,15 @@ class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     async _prepareContext(options: unknown) {
         const context = await super._prepareContext(options);
-        const theme = getTheme();
+        const appearance = resolveAppearance();
+        const theme = toLook(appearance);
 
         return {
             ...context,
             ...getFooterContext(MODULE_ID),
-            swatchGroups: [
-                swatchGroup('ground', 'base', BASE_SWATCHES, theme.ground),
-                swatchGroup('accent', 'accent', ACCENT_SWATCHES, theme.accent)
+            paletteGroups: [
+                paletteGroup('ground', 'base', appearance),
+                paletteGroup('accent', 'accent', appearance)
             ],
             finishes: finishChoices(theme),
             textColours: textColourRows(theme),
@@ -185,19 +215,49 @@ class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
     _onRender(context: unknown, options: unknown): void {
         super._onRender(context, options);
+        this.bindSwatches();
+        this.bindTextColours();
+        this.bindOwnTheme();
+        this.bindThemeName();
+    }
 
-        for (const well of this.element.querySelectorAll<HTMLInputElement>('input[type="color"]')) {
+    bindSwatches(): void {
+        for (const swatch of this.element.querySelectorAll<HTMLInputElement>('.gs-library-theme-swatch')) {
+            const kind = swatch.dataset.kind as PaletteKey;
+            const index = Number(swatch.dataset.index);
+
+            swatch.addEventListener('click', (event) => {
+                if (swatch.ariaCurrent === 'true') {
+                    return;
+                }
+
+                // Skip the colour picker until the swatch is picked
+                event.preventDefault();
+                void this.save(swatch, () => writeTheme({ [kind]: swatch.value }));
+            });
+            swatch.addEventListener('change', () => {
+                void this.save(swatch, () => changeSwatch(kind, index, swatch.value));
+            });
+        }
+    }
+
+    bindTextColours(): void {
+        for (const well of this.element.querySelectorAll<HTMLInputElement>('.gs-library-theme-text > input')) {
             well.addEventListener('change', () => void this.save(well, () => writeTheme({
                 [well.dataset.picks as ColourKey]: well.value
             })));
         }
+    }
 
+    bindOwnTheme(): void {
         const ownTheme = this.element.querySelector<HTMLInputElement>('[name="ownTheme"]');
 
         ownTheme?.addEventListener('change', () => void this.save(ownTheme, () => setAppearance({
             enabled: ownTheme.checked
         })));
+    }
 
+    bindThemeName(): void {
         getThemeNameField(this.element)?.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 void this.saveCurrentTheme(event.currentTarget as HTMLElement);
@@ -228,10 +288,14 @@ class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         await this.save(control, () => savePreset(name, getTheme()), 'saved.failed');
     }
 
-    static onPickColour(this: ThemeEditor, _event: PointerEvent, target: HTMLElement): void {
-        const { picks, colour } = target.dataset;
+    static onAddSwatch(this: ThemeEditor, _event: PointerEvent, target: HTMLElement): void {
+        void this.save(target, () => addSwatch(target.dataset.kind as PaletteKey));
+    }
 
-        void this.save(target, () => writeTheme({ [picks as ColourKey]: colour }));
+    static onDeleteSwatch(this: ThemeEditor, _event: PointerEvent, target: HTMLElement): void {
+        const { kind, index } = target.dataset;
+
+        void this.save(target, () => deleteSwatch(kind as PaletteKey, Number(index)));
     }
 
     static onPickFinish(this: ThemeEditor, _event: PointerEvent, target: HTMLElement): void {

@@ -1,19 +1,29 @@
 <div class="gs-shell gs-library-theme">
   <div class="gs-scroll gs-library-theme-body">
-    {{#each swatchGroups}}
+    {{#each paletteGroups}}
       <section class="gs-library-theme-field">
         <span class="gs-library-theme-label">{{legend}}</span>
         <div class="gs-library-theme-swatches" role="group" aria-label="{{legend}}">
           {{#each swatches}}
-            <button type="button" class="gs-library-theme-swatch" data-action="pickColour"
-                    data-picks="{{../picks}}" data-colour="{{colour}}" aria-pressed="{{active}}"
-                    data-tooltip="{{label}}" aria-label="{{label}}" style="--swatch: {{colour}}"></button>
+            <span class="gs-library-theme-slot{{#if active}} is-active{{/if}}">
+              <input type="color" class="gs-library-theme-swatch" data-kind="{{../kind}}" data-index="{{index}}"
+                     value="{{colour}}" aria-label="{{colour}}" {{#if active}}aria-current="true"{{/if}} />
+              {{#if ../canDelete}}
+                <button type="button" class="gs-library-theme-delete" data-action="deleteSwatch"
+                        data-kind="{{../kind}}" data-index="{{index}}"
+                        data-tooltip="{{localize 'GRIMMTALE.theme.delete'}}"
+                        aria-label="{{localize 'GRIMMTALE.theme.delete'}} {{colour}}">
+                  <i class="fa-solid fa-xmark" inert></i>
+                </button>
+              {{/if}}
+            </span>
           {{/each}}
-          <label class="gs-library-theme-custom{{#if isCustom}} is-active{{/if}}" style="--swatch: {{value}}"
-                 data-tooltip="{{custom}}">
-            <input type="color" data-picks="{{picks}}" value="{{value}}" aria-label="{{custom}}" />
-            <i class="fa-solid fa-plus" inert></i>
-          </label>
+          {{#if canAdd}}
+            <button type="button" class="gs-library-theme-add" data-action="addSwatch" data-kind="{{kind}}"
+                    data-tooltip="{{add}}" aria-label="{{add}}">
+              <i class="fa-solid fa-plus" inert></i>
+            </button>
+          {{/if}}
         </div>
       </section>
     {{/each}}
@@ -82,8 +92,8 @@
                 <span class="gs-library-theme-saved-finish">{{finishLabel}}</span>
               </button>
               <button type="button" class="gs-icon-btn dense" data-action="deleteTheme" data-saved="{{id}}"
-                      data-tooltip="{{localize 'GRIMMTALE.theme.saved.delete'}}"
-                      aria-label="{{localize 'GRIMMTALE.theme.saved.delete'}} {{name}}">
+                      data-tooltip="{{localize 'GRIMMTALE.theme.delete'}}"
+                      aria-label="{{localize 'GRIMMTALE.theme.delete'}} {{name}}">
                 <i class="fa-solid fa-xmark" inert></i>
               </button>
             </li>

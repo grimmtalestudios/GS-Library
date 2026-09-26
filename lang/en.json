@@ -21,8 +21,6 @@
   "GRIMMTALE.theme.score.good": "Readable",
   "GRIMMTALE.theme.score.label": "Legibility",
   "GRIMMTALE.theme.score.poor": "Hard to read",
-  "GRIMMTALE.theme.score.seeThrough": "Measured on a solid base colour. A see-through finish sits on whatever is behind it, so expect a little less than this.",
-  "GRIMMTALE.theme.score.weakest": "{name} is too close to the base colour to make out. Try a darker base colour, or a bolder accent.",
   "GRIMMTALE.theme.text.clear": "Back to default",
   "GRIMMTALE.theme.text.faint": "Quietest text",
   "GRIMMTALE.theme.text.ink": "Body text",

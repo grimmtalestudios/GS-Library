@@ -234,10 +234,6 @@
   --gs-figure-color: var(--gs-bad);
 }
 
-.gs-library-theme .gs-hint {
-  margin: 0;
-}
-
 .gs-library-theme-own {
   display: flex;
   align-items: center;

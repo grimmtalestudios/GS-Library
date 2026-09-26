@@ -10,7 +10,6 @@ import { getFooterContext } from './moduleInfo.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
 import { whileSaving } from './saving.js';
 import { isStudioDefault } from './stamp.js';
-import { isSeeThrough } from './surface.js';
 import { createTheme } from './theme.js';
 import { buildTokens, TEXT_KEYS } from './tokens.js';
 const WINDOW_ID = `${MODULE_ID}-theme`;
@@ -86,19 +85,12 @@ function textColourRows(theme) {
         isSet: Boolean(theme[key])
     }));
 }
-function scoreNote(theme, score) {
-    if (score.failing) {
-        return loc('score.weakest', { name: score.weakest });
-    }
-    return isSeeThrough(theme) ? loc('score.seeThrough') : '';
-}
 function scoreSummary(theme) {
     const score = scoreTokens(buildTokens(theme));
     return {
         value: score.score,
         verdict: score.verdict,
-        label: loc(`score.${score.verdict}`),
-        note: scoreNote(theme, score)
+        label: loc(`score.${score.verdict}`)
     };
 }
 function isSameTheme(a, b) {

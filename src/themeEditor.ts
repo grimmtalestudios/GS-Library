@@ -18,7 +18,6 @@ import { getFooterContext } from './moduleInfo.js';
 import { deletePreset, listPresets, savePreset } from './presets.js';
 import { whileSaving } from './saving.js';
 import { isStudioDefault } from './stamp.js';
-import { isSeeThrough } from './surface.js';
 import { createTheme } from './theme.js';
 import { type Appearance, buildTokens, TEXT_KEYS } from './tokens.js';
 
@@ -116,22 +115,13 @@ function textColourRows(theme: Theme) {
     }));
 }
 
-function scoreNote(theme: Theme, score: ReturnType<typeof scoreTokens>): string {
-    if (score.failing) {
-        return loc('score.weakest', { name: score.weakest });
-    }
-
-    return isSeeThrough(theme) ? loc('score.seeThrough') : '';
-}
-
 function scoreSummary(theme: Theme) {
     const score = scoreTokens(buildTokens(theme));
 
     return {
         value: score.score,
         verdict: score.verdict,
-        label: loc(`score.${score.verdict}`),
-        note: scoreNote(theme, score)
+        label: loc(`score.${score.verdict}`)
     };
 }
 

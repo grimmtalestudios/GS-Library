@@ -1,0 +1,108 @@
+<div class="gs-shell gs-library-theme">
+  <div class="gs-scroll gs-library-theme-body">
+    {{#each swatchGroups}}
+      <section class="gs-library-theme-field">
+        <span class="gs-library-theme-label">{{legend}}</span>
+        <div class="gs-library-theme-swatches" role="group" aria-label="{{legend}}">
+          {{#each swatches}}
+            <button type="button" class="gs-library-theme-swatch" data-action="pickColour"
+                    data-picks="{{../picks}}" data-colour="{{colour}}" aria-pressed="{{active}}"
+                    data-tooltip="{{label}}" aria-label="{{label}}" style="--swatch: {{colour}}"></button>
+          {{/each}}
+          <label class="gs-library-theme-custom{{#if isCustom}} is-active{{/if}}" style="--swatch: {{value}}"
+                 data-tooltip="{{custom}}">
+            <input type="color" data-picks="{{picks}}" value="{{value}}" aria-label="{{custom}}" />
+            <i class="fa-solid fa-plus" inert></i>
+          </label>
+        </div>
+      </section>
+    {{/each}}
+    <section class="gs-library-theme-field">
+      <span class="gs-library-theme-label">{{localize "GRIMMTALE.theme.finish"}}</span>
+      <div class="gs-library-theme-finishes" role="group"
+           aria-label="{{localize 'GRIMMTALE.theme.finish'}}">
+        {{#each finishes}}
+          <button type="button" class="gs-library-theme-finish" data-action="pickFinish"
+                  data-finish="{{key}}" aria-pressed="{{active}}">{{label}}</button>
+        {{/each}}
+      </div>
+    </section>
+    <section class="gs-library-theme-field">
+      <div class="gs-library-theme-head">
+        <span class="gs-library-theme-label">{{localize "GRIMMTALE.theme.text.legend"}}</span>
+        <span class="gs-library-theme-score" data-verdict="{{score.verdict}}"
+              data-tooltip="{{localize 'GRIMMTALE.theme.score.label'}}">
+          <span class="gs-figure">{{score.value}}</span>
+          <span>{{score.label}}</span>
+        </span>
+      </div>
+      {{#each textColours}}
+        <div class="gs-library-theme-text">
+          <span>{{label}}</span>
+          <input type="color" data-picks="{{key}}" value="{{colour}}" aria-label="{{label}}" />
+          {{#if isSet}}
+            <button type="button" class="gs-icon-btn dense" data-action="clearTextColour" data-text="{{key}}"
+                    data-tooltip="{{localize 'GRIMMTALE.theme.text.clear'}}"
+                    aria-label="{{localize 'GRIMMTALE.theme.text.clear'}}">
+              <i class="fa-solid fa-rotate-left" inert></i>
+            </button>
+          {{/if}}
+        </div>
+      {{/each}}
+      {{#if score.note}}
+        <p class="gs-hint">{{score.note}}</p>
+      {{/if}}
+    </section>
+    <section class="gs-library-theme-field">
+      <div class="gs-library-theme-head">
+        <span class="gs-library-theme-label">{{localize "GRIMMTALE.theme.saved.legend"}}</span>
+        <label class="gs-library-theme-own">
+          <input type="checkbox" name="ownTheme" {{checked ownTheme}} />
+          <span>{{localize "GRIMMTALE.theme.own"}}</span>
+        </label>
+      </div>
+      <div class="gs-library-theme-save">
+        <input type="text" name="themeName" maxlength="40" autocomplete="off"
+               placeholder="{{localize 'GRIMMTALE.theme.saved.placeholder'}}"
+               aria-label="{{localize 'GRIMMTALE.theme.saved.placeholder'}}" />
+        <button type="button" class="gs-btn ghost" data-action="saveTheme">
+          <i class="fa-solid fa-floppy-disk" inert></i>
+          <span>{{localize "GRIMMTALE.theme.save"}}</span>
+        </button>
+      </div>
+      {{#if savedThemes.length}}
+        <ul class="gs-library-theme-saved-list">
+          {{#each savedThemes}}
+            <li class="gs-library-theme-saved">
+              <button type="button" class="gs-library-theme-saved-load" data-action="loadTheme"
+                      data-saved="{{id}}" aria-pressed="{{active}}">
+                <span class="gs-library-theme-saved-chip" style="background: {{ground}}"></span>
+                <span class="gs-library-theme-saved-chip" style="background: {{accent}}"></span>
+                <span class="gs-library-theme-saved-name">{{name}}</span>
+                <span class="gs-library-theme-saved-finish">{{finishLabel}}</span>
+              </button>
+              <button type="button" class="gs-icon-btn dense" data-action="deleteTheme" data-saved="{{id}}"
+                      data-tooltip="{{localize 'GRIMMTALE.theme.saved.delete'}}"
+                      aria-label="{{localize 'GRIMMTALE.theme.saved.delete'}} {{name}}">
+                <i class="fa-solid fa-xmark" inert></i>
+              </button>
+            </li>
+          {{/each}}
+        </ul>
+      {{/if}}
+    </section>
+    {{#unless isDefault}}
+      <button type="button" class="gs-btn ghost" data-action="reset">
+        <i class="fa-solid fa-rotate-left" inert></i>
+        <span>{{localize "GRIMMTALE.theme.reset"}}</span>
+      </button>
+    {{/unless}}
+  </div>
+  <footer class="gs-footer">
+    {{#if website}}
+      <a href="{{website}}" target="_blank" rel="noopener noreferrer">{{footer}}</a>
+    {{else}}
+      {{footer}}
+    {{/if}}
+  </footer>
+</div>

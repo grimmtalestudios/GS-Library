@@ -1,5 +1,4 @@
 import { getCurrentTokens, resolveAppearance, resolveTheme, setAppearance, setModuleTheme, THEMES } from './appearance.js';
-import { openAppearanceWindow, registerAppearanceMenu } from './appearanceWindow.js';
 import { getOpenApps, getOpenAppsOf, openModuleSettings, refreshApps } from './apps.js';
 import { auditTokens, scoreTokens } from './audit.js';
 import { bootPhase, bootPhases, safeHook } from './boot.js';
@@ -26,6 +25,7 @@ import { readSetting, registerSettings, writeSetting } from './settings.js';
 import { fixSfxTriggers } from './shims.js';
 import { applyAppearance, clearAppearance, refreshAppearance } from './stamp.js';
 import { createTheme, registerAppearanceSettings } from './theme.js';
+import { openThemeEditor, registerThemeMenu } from './themeEditor.js';
 import { migrateLegacyThemes, registerMigrationSetting } from './themeMigration.js';
 import { buildTokens } from './tokens.js';
 import { checkForUpdates, collectUpdates, isStudioModule, registerUpdateSettings } from './updates.js';
@@ -83,7 +83,7 @@ const api = Object.freeze({
     listPresets,
     savePreset,
     deletePreset,
-    openLibrarySettings: openAppearanceWindow,
+    openLibrarySettings: openThemeEditor,
     GROUNDS,
     ACCENTS,
     groundSet,
@@ -128,7 +128,7 @@ Hooks.once('init', () => {
         appearance: registerAppearanceSettings,
         presets: registerPresetSetting,
         migration: registerMigrationSetting,
-        settingsMenu: registerAppearanceMenu,
+        themeMenu: registerThemeMenu,
         updates: registerUpdateSettings
     });
     log.info(`v${api.version} ready`);

@@ -51,7 +51,9 @@ export function bindCombatTurns(callback, { notifyOnEnd = true } = {}) {
         if (!TURN_FIELDS.some((field) => field in changed)) {
             return;
         }
-        if (changed.active === false) {
+        // Previous Round at round 1 sets round 0
+        const isRewound = 'round' in changed && !combat.started;
+        if (changed.active === false || isRewound) {
             onEnd(combat);
             return;
         }

@@ -42,8 +42,8 @@ function dressElement(root, appearance, overlay) {
     const surface = buildSurface(appearance, !overlay);
     const content = root.querySelector(':scope > .window-content');
     const header = root.querySelector(':scope > .window-header');
-    // Core's opaque --background on .application covers a see-through ground
-    const frame = { 'background-color': isSeeThrough(appearance) ? 'transparent' : '' };
+    // Core paints .application with --background, parchment in the light theme
+    const frame = { background: isSeeThrough(appearance) ? 'transparent' : '' };
     writeStyles(root, 'gsAppearance', content ? {
         ...tokens,
         ...frame

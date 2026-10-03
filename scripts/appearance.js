@@ -61,12 +61,12 @@ function getWorldAppearance() {
     return toAppearance(readSetting(MODULE_ID, 'appearance', {}));
 }
 function writeWorldAppearance(patch) {
-    // game.settings.get returns the old value until the server answers
+    // game.settings.get returns the old value until the server responds
     const write = lastWorldWrite.then(() => writeSetting(MODULE_ID, 'appearance', toAppearance({
         ...getWorldAppearance(),
         ...patch
     })));
-    lastWorldWrite = write.catch(() => undefined); // a failed write doesn't hold up the next
+    lastWorldWrite = write.catch(() => undefined); // a failed write doesn't block the next
     return write;
 }
 export function getUserOverride() {

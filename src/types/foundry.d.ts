@@ -109,6 +109,7 @@ declare const game: {
         get(namespace: string, key: string): unknown;
         set(namespace: string, key: string, value: unknown): Promise<unknown>;
         settings: Map<string, unknown>;
+        storage: { get(scope: 'client'): Storage };
         sheet: SettingsSheet;
     };
     user: FoundryUser;

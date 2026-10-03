@@ -15,7 +15,9 @@ export function registerMigrationSetting() {
 }
 // Dark was every module's default
 function wasOnBaseTheme(module) {
-    return isStudioModule(module) && readSetting(module.id, 'theme', null) === THEMES.base;
+    // Rebuilt modules don't register their old client 'theme' setting
+    const stored = game.settings.storage.get('client').getItem(`${module.id}.theme`);
+    return module.active && isStudioModule(module) && stored === JSON.stringify(THEMES.base);
 }
 export function migrateLegacyThemes() {
     if (readSetting(MODULE_ID, MIGRATED, false)) {

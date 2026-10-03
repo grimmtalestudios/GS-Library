@@ -19,7 +19,11 @@ export function registerMigrationSetting(): void {
 
 // Dark was every module's default
 function wasOnBaseTheme(module: FoundryModule): boolean {
-    return isStudioModule(module) && readSetting<unknown>(module.id, 'theme', null) === THEMES.base;
+
+    // Rebuilt modules don't register their old client 'theme' setting
+    const stored = game.settings.storage.get('client').getItem(`${module.id}.theme`);
+
+    return module.active && isStudioModule(module) && stored === JSON.stringify(THEMES.base);
 }
 
 export function migrateLegacyThemes(): void {

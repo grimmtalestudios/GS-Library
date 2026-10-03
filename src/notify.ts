@@ -2,11 +2,27 @@ type NotificationLevel = 'info' | 'warn' | 'error';
 
 type Notifier = Record<NotificationLevel, (message: string) => PostedNotification | undefined>;
 
+function tagNotification(notification: PostedNotification, className: string): void {
+    let element = notification.element;
+
+    element?.classList.add(className);
+
+    // Core sets element when a queued notification is shown
+    Object.defineProperty(notification, 'element', {
+        get: () => element,
+        set: (rendered: HTMLElement) => {
+            rendered.classList.add(className);
+            element = rendered;
+        }
+    });
+}
+
 function postTagged(level: NotificationLevel, message: string, className: string): PostedNotification | undefined {
     const notification = ui.notifications?.[level](message);
 
-    // No element yet if the notification is queued
-    notification?.element?.classList.add(className);
+    if (notification) {
+        tagNotification(notification, className);
+    }
 
     return notification;
 }

@@ -131,8 +131,14 @@ function getStampOptions(element: HTMLElement): StampOptions {
     };
 }
 
+function findStampedElements(): HTMLElement[] {
+    const { detached } = foundry.applications; // v13 has no detached windows
+
+    return detached?.querySelectorAll(STAMPED) ?? [...document.querySelectorAll<HTMLElement>(STAMPED)];
+}
+
 export function refreshAppearance(): number {
-    const stamped = document.querySelectorAll<HTMLElement>(STAMPED);
+    const stamped = findStampedElements();
 
     for (const element of stamped) {
         applyAppearance(element, getStampOptions(element));

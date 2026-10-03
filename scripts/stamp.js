@@ -95,8 +95,12 @@ function getStampOptions(element) {
         overlay: element.dataset.gsOverlay !== undefined
     };
 }
+function findStampedElements() {
+    const { detached } = foundry.applications; // v13 has no detached windows
+    return detached?.querySelectorAll(STAMPED) ?? [...document.querySelectorAll(STAMPED)];
+}
 export function refreshAppearance() {
-    const stamped = document.querySelectorAll(STAMPED);
+    const stamped = findStampedElements();
     for (const element of stamped) {
         applyAppearance(element, getStampOptions(element));
     }

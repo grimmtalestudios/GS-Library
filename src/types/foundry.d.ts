@@ -6,6 +6,7 @@ declare namespace foundry {
     }
     namespace applications {
         const instances: Map<string, FoundryApp>;
+        const detached: { querySelectorAll(selector: string): HTMLElement[] } | undefined;
         namespace api {
             const ApplicationV2: any;
             const DialogV2: any;

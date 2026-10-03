@@ -38,8 +38,9 @@ function getUpdateEndpoint(module) {
         return null;
     }
     const url = new URL(module.manifest);
+    const isHttps = url.protocol === 'https:'; // the URL carries the subscriber key
     // Manifests on GitHub are development clones
-    return url.hostname === PACKAGES_HOST ? url.href : null;
+    return isHttps && url.hostname === PACKAGES_HOST ? url.href : null;
 }
 async function fetchVersion(url) {
     try {

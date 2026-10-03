@@ -10,6 +10,7 @@ export const THEMES = Object.freeze({
 });
 const FOLLOW = 'follow';
 export const PALETTE_MAX = 10;
+let lastWorldWrite = Promise.resolve();
 function isTheme(value) {
     return value === THEMES.dark || value === THEMES.base;
 }
@@ -59,6 +60,15 @@ export function toLook(raw) {
 function getWorldAppearance() {
     return toAppearance(readSetting(MODULE_ID, 'appearance', {}));
 }
+function writeWorldAppearance(patch) {
+    // game.settings.get returns the old value until the server answers
+    const write = lastWorldWrite.then(() => writeSetting(MODULE_ID, 'appearance', toAppearance({
+        ...getWorldAppearance(),
+        ...patch
+    })));
+    lastWorldWrite = write.catch(() => undefined); // a failed write doesn't hold up the next
+    return write;
+}
 export function getUserOverride() {
     const raw = readSetting(MODULE_ID, 'appearanceOverride', {});
     return {
@@ -75,10 +85,7 @@ export function resolveAppearance() {
 }
 export async function setAppearance(patch, { scope = 'user' } = {}) {
     if (scope === 'world') {
-        return writeSetting(MODULE_ID, 'appearance', toAppearance({
-            ...getWorldAppearance(),
-            ...patch
-        }));
+        return writeWorldAppearance(patch);
     }
     const current = getUserOverride();
     // If the override is being switched on, start from the world appearance

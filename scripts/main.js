@@ -29,6 +29,7 @@ import { openThemeEditor, registerThemeMenu } from './themeEditor.js';
 import { migrateLegacyThemes, registerMigrationSetting } from './themeMigration.js';
 import { buildTokens } from './tokens.js';
 import { checkForUpdates, collectUpdates, isStudioModule, registerUpdateSettings } from './updates.js';
+import { queueWrite } from './writeQueue.js';
 const log = createLogger(MODULE_ID);
 const api = Object.freeze({
     get version() {
@@ -103,6 +104,7 @@ const api = Object.freeze({
     clearSaving,
     isSaving,
     whileSaving,
+    queueWrite,
     openApps: getOpenApps,
     openAppsOf: getOpenAppsOf,
     refreshApps,

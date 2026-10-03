@@ -4,13 +4,13 @@ import { DEFAULT_FINISH, isFinish } from './finishes.js';
 import { ACCENTS, GROUNDS } from './palette.js';
 import { readSetting, writeSetting } from './settings.js';
 import { buildTokens } from './tokens.js';
+import { queueWrite } from './writeQueue.js';
 export const THEMES = Object.freeze({
     dark: 'dark',
     base: 'base'
 });
 const FOLLOW = 'follow';
 export const PALETTE_MAX = 10;
-let lastWorldWrite = Promise.resolve();
 function isTheme(value) {
     return value === THEMES.dark || value === THEMES.base;
 }
@@ -62,12 +62,10 @@ function getWorldAppearance() {
 }
 function writeWorldAppearance(patch) {
     // game.settings.get returns the old value until the server responds
-    const write = lastWorldWrite.then(() => writeSetting(MODULE_ID, 'appearance', toAppearance({
+    return queueWrite(`${MODULE_ID}.appearance`, () => writeSetting(MODULE_ID, 'appearance', toAppearance({
         ...getWorldAppearance(),
         ...patch
     })));
-    lastWorldWrite = write.catch(() => undefined); // a failed write doesn't block the next
-    return write;
 }
 export function getUserOverride() {
     const raw = readSetting(MODULE_ID, 'appearanceOverride', {});

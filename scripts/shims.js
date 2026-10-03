@@ -2,34 +2,12 @@ import { MODULE_ID } from './constants.js';
 import { createLogger } from './logger.js';
 const log = createLogger(MODULE_ID);
 const SFX_MODULE = 'dice-so-nice-more-sfx-triggers';
-// The SFX module listens for dnd5e's old rollAbilitySave and rollAbilityTest names
-const SFX_HOOKS = [
-    {
-        hook: 'dnd5e.rollSkill',
-        prefix: 'dnd5e-skill',
-        field: 'skill'
-    },
-    {
-        hook: 'dnd5e.rollAbilitySave',
-        prefix: 'dnd5e-save',
-        field: 'ability'
-    },
-    {
-        hook: 'dnd5e.rollSavingThrow',
-        prefix: 'dnd5e-save',
-        field: 'ability'
-    },
-    {
-        hook: 'dnd5e.rollAbilityTest',
-        prefix: 'dnd5e-ability-test',
-        field: 'ability'
-    },
-    {
-        hook: 'dnd5e.rollAbilityCheck',
-        prefix: 'dnd5e-ability-test',
-        field: 'ability'
-    }
-];
+const SFX_MODULE_HOOKS = ['dnd5e.rollSkill', 'dnd5e.rollAbilitySave', 'dnd5e.rollAbilityTest'];
+const SFX_PREFIXES = {
+    skill: 'dnd5e-skill',
+    save: 'dnd5e-save',
+    ability: 'dnd5e-ability-test'
+};
 // The SFX module's listeners are anonymous
 function isSfxListener(fn) {
     const source = String(fn);
@@ -54,25 +32,27 @@ function isBrokenOnCurrentSignature(fn) {
         return true;
     }
 }
-function keyOf(data, legacyKey, field) {
-    const isDataObject = data !== null && typeof data === 'object' && !Array.isArray(data);
-    const key = isDataObject ? data[field] : undefined;
-    return typeof key === 'string' ? key : legacyKey;
+function getTriggerId(message) {
+    const { type = '', skillId, ability } = (message.getFlag('dnd5e', 'roll') ?? {});
+    const prefix = SFX_PREFIXES[type];
+    const key = skillId ?? ability;
+    return prefix && key ? `${prefix}-${key}` : null;
 }
-function tagDie(rolls, key, prefix) {
-    const roll = (Array.isArray(rolls) ? rolls[0] : rolls);
-    const die = roll?.dice?.[0];
-    if (!die?.options) {
+function onPreCreateChatMessage(message) {
+    const id = getTriggerId(message);
+    const die = message.rolls[0]?.dice[0];
+    if (!id || !die) {
         return;
     }
     die.options.sfx = {
-        id: `${prefix}-${key}`,
+        id,
         result: die.total
     };
+    message.updateSource({ rolls: message.rolls }); // writes the tag into the stored roll JSON
 }
 function removeBrokenSfxListeners() {
     let removed = 0;
-    for (const { hook } of SFX_HOOKS) {
+    for (const hook of SFX_MODULE_HOOKS) {
         const broken = [...Hooks.events[hook] ?? []]
             .filter(({ fn }) => isSfxListener(fn) && isBrokenOnCurrentSignature(fn));
         for (const { id } of broken) {
@@ -82,17 +62,6 @@ function removeBrokenSfxListeners() {
     }
     return removed;
 }
-function bindSfxTriggers() {
-    for (const { hook, prefix, field } of SFX_HOOKS) {
-        Hooks.on(hook, (rolls, data, legacyKey) => {
-            const key = keyOf(data, legacyKey, field);
-            // Death saves have no ability and no SFX trigger
-            if (key) {
-                tagDie(rolls, key, prefix);
-            }
-        });
-    }
-}
 export function fixSfxTriggers() {
     if (game.system.id !== 'dnd5e' || !game.modules.get(SFX_MODULE)?.active) {
         return;
@@ -101,6 +70,6 @@ export function fixSfxTriggers() {
     if (!removed) {
         return;
     }
-    bindSfxTriggers();
+    Hooks.on('preCreateChatMessage', onPreCreateChatMessage); // dnd5e calls its roll hooks after creating the message
     log.info(`Shimmed ${SFX_MODULE}: replaced ${removed} listener(s) broken against dnd5e ${game.system.version}`);
 }

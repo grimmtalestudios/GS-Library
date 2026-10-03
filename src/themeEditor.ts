@@ -257,6 +257,12 @@ class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     async save(control: HTMLElement, write: () => Promise<unknown>, failure = 'saveFailed'): Promise<void> {
+
+        // Changes made during a save read the old theme
+        if (this.element.querySelector('[aria-busy="true"]')) {
+            return;
+        }
+
         try {
             await whileSaving(control, write);
         } catch (err) {

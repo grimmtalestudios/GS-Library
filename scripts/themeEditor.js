@@ -206,6 +206,10 @@ class ThemeEditor extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
     async save(control, write, failure = 'saveFailed') {
+        // Changes made during a save read the old theme
+        if (this.element.querySelector('[aria-busy="true"]')) {
+            return;
+        }
         try {
             await whileSaving(control, write);
         }

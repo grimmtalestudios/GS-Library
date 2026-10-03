@@ -18,6 +18,7 @@ const FETCH_TIMEOUT_MS = 8000;
 
 const log = createLogger(MODULE_ID);
 const theme = createTheme(MODULE_ID);
+const { escapeHTML } = foundry.utils;
 
 export function registerUpdateSettings(): void {
     registerSettings(MODULE_ID, 'GRIMMTALE.settings', {
@@ -138,7 +139,7 @@ function updateRow(update: PendingUpdate): string {
     const installed = game.i18n.format('GRIMMTALE.updates.installed', { version: update.installed });
     const from = `<span class="gs-update-from">${installed}</span>`;
 
-    return `<li><strong>${update.title}</strong> ${update.available} ${from}</li>`;
+    return `<li><strong>${escapeHTML(update.title)}</strong> ${escapeHTML(update.available)} ${from}</li>`;
 }
 
 async function reportUpdates(updates: PendingUpdate[]): Promise<void> {

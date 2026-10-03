@@ -1,5 +1,6 @@
 declare namespace foundry {
     namespace utils {
+        function escapeHTML(value: unknown): string;
         function isNewerVersion(v1: string, v0: string): boolean;
         function randomID(): string;
     }

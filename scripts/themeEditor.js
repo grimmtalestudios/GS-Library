@@ -50,9 +50,10 @@ async function addSwatch(kind) {
 }
 async function deleteSwatch(kind, index) {
     const appearance = resolveAppearance();
+    const active = appearance[kind];
     const colours = appearance.palette[kind].filter((_colour, at) => at !== index);
-    const active = colours.includes(appearance[kind]) ? appearance[kind] : colours[0];
-    return writePalette(kind, colours, active);
+    const isActiveDeleted = appearance.palette[kind][index] === active && !colours.includes(active);
+    return writePalette(kind, colours, isActiveDeleted ? colours[0] : active);
 }
 function paletteGroup(kind, labels, appearance) {
     const colours = appearance.palette[kind];

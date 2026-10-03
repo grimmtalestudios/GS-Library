@@ -25,7 +25,9 @@ function themesOf(value) {
 function coloursOf(value, active) {
     const stored = Array.isArray(value) ? value.map((colour) => colourOr(colour, '')).filter(Boolean) : [];
     const kept = stored.slice(0, PALETTE_MAX);
-    return kept.includes(active) ? kept : [active, ...kept];
+    const hasRoom = kept.length < PALETTE_MAX;
+    // Don't drop a saved colour to make room for the active one
+    return hasRoom && !kept.includes(active) ? [active, ...kept] : kept;
 }
 function paletteOf(value, ground, accent) {
     const stored = (value && typeof value === 'object' ? value : {});

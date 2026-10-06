@@ -15,10 +15,10 @@
     }
   ],
   "url": "https://grimmtalestudios.com",
-  "manifest": "https://raw.githubusercontent.com/grimmtalestudios/GS-Library/release/module.json",
+  "manifest": "https://raw.githubusercontent.com/grimmtalestudios/GS-Library/main/module.json",
   "download": "https://github.com/grimmtalestudios/GS-Library/archive/refs/tags/v1.0.0.zip",
   "bugs": "https://github.com/grimmtalestudios/GS-Library/issues",
-  "license": "https://github.com/grimmtalestudios/GS-Library/blob/release/LICENSE",
+  "license": "https://github.com/grimmtalestudios/GS-Library/blob/main/LICENSE",
   "esmodules": [
     "scripts/main.js"
   ],
